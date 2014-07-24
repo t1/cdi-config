@@ -17,6 +17,8 @@ import com.github.t1.stereotypes.Annotations;
 
 @Slf4j
 public class ConfigCdiExtension implements Extension {
+    private static final String CONFIG_FILE = "configuration.properties";
+
     private static class ConfiguringInjectionTarget<T> extends InjectionTargetWrapper<T> {
         private final Map<Field, Object> configs;
 
@@ -40,9 +42,33 @@ public class ConfigCdiExtension implements Extension {
         }
     }
 
-    StringConvert stringConvert = StringConvert.INSTANCE;
+    private final StringConvert stringConvert = StringConvert.INSTANCE;
+
+    private final Properties properties = loadProperties();
+
+    private Properties loadProperties() {
+        Properties properties = new Properties();
+        try (InputStream stream = classLoader().getResourceAsStream(CONFIG_FILE)) {
+            if (stream == null) {
+                log.debug("found no " + CONFIG_FILE);
+            } else {
+                log.debug("found a " + CONFIG_FILE);
+                properties.load(stream);
+            }
+            return properties;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private ClassLoader classLoader() {
+        return Thread.currentThread().getContextClassLoader();
+    }
 
     public <T> void processInjectionTarget(@Observes ProcessInjectionTarget<T> pit) {
+        if (properties.isEmpty())
+            return;
+
         InjectionTarget<T> it = pit.getInjectionTarget();
 
         Map<Field, Object> configs = buildConfigMap(pit);
@@ -54,39 +80,36 @@ public class ConfigCdiExtension implements Extension {
 
     private <T> Map<Field, Object> buildConfigMap(ProcessInjectionTarget<T> pit) {
         Class<T> type = pit.getAnnotatedType().getJavaClass();
-        log.debug("scan {} for configuration points", type);
+        log.trace("scan {} for configuration points", type);
 
-        Properties properties = loadProperties(type);
-        if (properties.isEmpty())
-            return null;
-
-        return adaptConfigs(type, properties);
+        return adaptConfigs(pit, type);
     }
 
-    private <T> Properties loadProperties(Class<T> type) {
-        Properties properties = new Properties();
-        try (InputStream stream = type.getResourceAsStream(type.getSimpleName() + ".properties")) {
-            if (stream != null) {
-                properties.load(stream);
-            }
-            return properties;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private <T> Map<Field, Object> adaptConfigs(Class<T> type, Properties properties) {
+    private <T> Map<Field, Object> adaptConfigs(ProcessInjectionTarget<T> pit, Class<T> type) {
         Map<Field, Object> configs = new HashMap<>();
         for (Field field : type.getDeclaredFields()) {
             AnnotatedElement annotations = Annotations.on(field);
             Config config = annotations.getAnnotation(Config.class);
             if (config != null) {
-                log.debug("  configure field {}: {}", field.getName(), field.getType().getSimpleName());
-                String stringValue = (String) properties.get(field.getName());
-                Object convertedValue = stringConvert.convertFromString(field.getType(), stringValue);
-                configs.put(field, convertedValue);
+                String propertyName = propertyName(config, field);
+                String stringValue = properties.getProperty(propertyName);
+                if (stringValue == null) {
+                    pit.addDefinitionError(new DefinitionException("no config value found for " + field));
+                } else {
+                    // do *not* log the value to configure... could be a password
+                    log.debug("configure {} field {} in {} to property {}", field.getType().getSimpleName(),
+                            field.getName(), type, propertyName);
+                    Object convertedValue = stringConvert.convertFromString(field.getType(), stringValue);
+                    field.setAccessible(true);
+                    configs.put(field, convertedValue);
+                }
             }
         }
         return configs;
+    }
+
+    private String propertyName(Config config, Field field) {
+        String name = config.name();
+        return Config.USE_FIELD_NAME.equals(name) ? field.getName() : name;
     }
 }

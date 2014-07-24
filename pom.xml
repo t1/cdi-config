@@ -57,47 +57,6 @@
                     </archive>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.2</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <minimizeJar>true</minimizeJar>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <relocations>
-                                <relocation>
-                                    <pattern>com.github.t1.stereotypes</pattern>
-                                    <shadedPattern>com.github.t1.log.shaded.stereotypes</shadedPattern>
-                                </relocation>
-<!--
-                                <relocation>
-                                    <pattern>javassist</pattern>
-                                    <shadedPattern>com.github.t1.log.shaded.javassist</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.joda.time</pattern>
-                                    <shadedPattern>com.github.t1.log.shaded.joda.time</shadedPattern>
-                                </relocation>
--->
-                            </relocations>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/maven/**</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -142,18 +101,6 @@
             <groupId>com.github.t1</groupId>
             <artifactId>stereotype-helper</artifactId>
             <version>1.0.3</version>
-        </dependency>
-<!--
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.16.1-GA</version>
-        </dependency>
--->
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.3</version>
         </dependency>
 
         <!-- test scope -->

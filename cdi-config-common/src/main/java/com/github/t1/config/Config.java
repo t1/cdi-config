@@ -10,4 +10,8 @@ import javax.inject.Qualifier;
 @Qualifier
 @Retention(RUNTIME)
 @Target({ TYPE, METHOD, FIELD, PARAMETER })
-public @interface Config {}
+public @interface Config {
+    public static final String USE_FIELD_NAME = "###_USE_FIELD_NAME_###";
+
+    public String name() default USE_FIELD_NAME;
+}

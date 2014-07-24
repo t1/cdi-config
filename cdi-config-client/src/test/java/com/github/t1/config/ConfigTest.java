@@ -27,12 +27,18 @@ public class ConfigTest {
     static class ToBeConfigured {
         @Config
         String string;
+
         @Config
         int i;
+
         @Config
         boolean bool;
+
         @Config
         LocalDate date;
+
+        @Config(name = "string")
+        String string2;
     }
 
     @Inject
@@ -56,5 +62,10 @@ public class ConfigTest {
     @Test
     public void shouldConfigureLocalDate() {
         assertEquals(LocalDate.of(2014, 12, 31), tbc.date);
+    }
+
+    @Test
+    public void shouldUseConfigName() {
+        assertEquals("test-value", tbc.string2);
     }
 }
