@@ -1,5 +1,7 @@
 # CDI Config
 
+[![Dependency Status](https://www.versioneye.com/user/projects/53f72f0ae09da337bc0003bd/badge.svg?style=flat)](https://www.versioneye.com/user/projects/53f72f0ae09da337bc0003bd)
+
 Taking the principles of CDI to configuration of Java EE 7 beans... trivial to start, powerful ad infinitum.
 
 
