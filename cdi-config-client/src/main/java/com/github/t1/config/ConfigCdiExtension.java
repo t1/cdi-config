@@ -6,7 +6,6 @@ import java.util.*;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.*;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,24 +19,32 @@ public class ConfigCdiExtension implements Extension {
     private static final String CONFIG_FILE = "configuration.properties";
 
     private static class ConfiguringInjectionTarget<T> extends InjectionTargetWrapper<T> {
-        private final Map<Field, Object> configs;
+        private final List<ConfigurationPoint> configs;
 
-        private ConfiguringInjectionTarget(InjectionTarget<T> delegate, Map<Field, Object> configs) {
+        private ConfiguringInjectionTarget(InjectionTarget<T> delegate, List<ConfigurationPoint> configs) {
             super(delegate);
             this.configs = configs;
         }
 
         @Override
-        public void inject(T target, CreationalContext<T> context) {
-            super.inject(target, context);
-            for (Map.Entry<Field, Object> entry : configs.entrySet()) {
-                Field field = entry.getKey();
-                Object value = entry.getValue();
-                try {
-                    field.set(target, value);
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                    throw new InjectionException("can't set " + field + " to \"" + value + "\"", e);
-                }
+        public void inject(T instance, CreationalContext<T> ctx) {
+            for (ConfigurationPoint configurationPoint : configs) {
+                configurationPoint.configure(instance);
+            }
+
+            log.debug("configured {}", instance);
+
+            super.inject(instance, ctx);
+        }
+
+        @Override
+        public void preDestroy(T instance) {
+            super.preDestroy(instance);
+
+            log.debug("deconfigure {}", instance);
+
+            for (ConfigurationPoint configurationPoint : configs) {
+                configurationPoint.deconfigure(instance);
             }
         }
     }
@@ -50,10 +57,10 @@ public class ConfigCdiExtension implements Extension {
         Properties properties = new Properties();
         try (InputStream stream = classLoader().getResourceAsStream(CONFIG_FILE)) {
             if (stream == null) {
-                log.debug("found no " + CONFIG_FILE);
+                log.debug("found no {}", CONFIG_FILE);
             } else {
-                log.debug("found a " + CONFIG_FILE);
                 properties.load(stream);
+                log.debug("found {} with {} entries", CONFIG_FILE, properties.size());
             }
             return properties;
         } catch (IOException e) {
@@ -71,22 +78,22 @@ public class ConfigCdiExtension implements Extension {
 
         InjectionTarget<T> it = pit.getInjectionTarget();
 
-        Map<Field, Object> configs = buildConfigMap(pit);
+        List<ConfigurationPoint> configs = buildConfigs(pit);
 
-        if (configs != null) {
+        if (!configs.isEmpty()) {
             pit.setInjectionTarget(new ConfiguringInjectionTarget<>(it, configs));
         }
     }
 
-    private <T> Map<Field, Object> buildConfigMap(ProcessInjectionTarget<T> pit) {
+    private <T> List<ConfigurationPoint> buildConfigs(ProcessInjectionTarget<T> pit) {
         Class<T> type = pit.getAnnotatedType().getJavaClass();
         log.trace("scan {} for configuration points", type);
 
         return adaptConfigs(pit, type);
     }
 
-    private <T> Map<Field, Object> adaptConfigs(ProcessInjectionTarget<T> pit, Class<T> type) {
-        Map<Field, Object> configs = new HashMap<>();
+    private <T> List<ConfigurationPoint> adaptConfigs(ProcessInjectionTarget<T> pit, Class<T> type) {
+        List<ConfigurationPoint> configs = new ArrayList<>();
         for (Field field : type.getDeclaredFields()) {
             AnnotatedElement annotations = Annotations.on(field);
             Config config = annotations.getAnnotation(Config.class);
@@ -97,11 +104,11 @@ public class ConfigCdiExtension implements Extension {
                     pit.addDefinitionError(new DefinitionException("no config value found for " + field));
                 } else {
                     // do *not* log the value to configure... could be a password
-                    log.debug("configure {} field {} in {} to property {}", field.getType().getSimpleName(),
-                            field.getName(), type, propertyName);
+                    log.debug("create ConfigurationPoint for {} field '{}' in {} to property '{}'", field.getType()
+                            .getSimpleName(), field.getName(), type, propertyName);
                     Object convertedValue = stringConvert.convertFromString(field.getType(), stringValue);
                     field.setAccessible(true);
-                    configs.put(field, convertedValue);
+                    configs.add(new ConfigurationPoint(field, convertedValue));
                 }
             }
         }

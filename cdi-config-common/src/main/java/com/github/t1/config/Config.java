@@ -5,11 +5,8 @@ import static java.lang.annotation.RetentionPolicy.*;
 
 import java.lang.annotation.*;
 
-import javax.inject.Qualifier;
-
-@Qualifier
 @Retention(RUNTIME)
-@Target({ TYPE, METHOD, FIELD, PARAMETER })
+@Target({ FIELD })
 public @interface Config {
     public static final String USE_FIELD_NAME = "###_USE_FIELD_NAME_###";
 
