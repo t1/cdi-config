@@ -40,8 +40,17 @@ public class ConfigTest extends AbstractTest {
         @Config
         LocalDate date;
 
-        @Config(name = "string")
-        String string2;
+        @Config(name = "test-string")
+        String testString;
+
+        @Config(name = "alt-string")
+        String altString;
+
+        @Config(name = "alt2-string")
+        String alt2string;
+
+        @Config(name = "alt3-string")
+        String alt3string;
 
         @Produces
         Pojo producePojo() {
@@ -77,7 +86,22 @@ public class ConfigTest extends AbstractTest {
 
     @Test
     public void shouldUseConfigName() {
-        assertEquals("test-value", tbc.string2);
+        assertEquals("test-value", tbc.testString);
+    }
+
+    @Test
+    public void shouldConfigureFromFirstImportedFile() {
+        assertEquals("alt-value", tbc.altString);
+    }
+
+    @Test
+    public void shouldConfigureFromSecondImportedFile() {
+        assertEquals("alt2-value", tbc.alt2string);
+    }
+
+    @Test
+    public void shouldConfigureFromIndirectlyImportedFile() {
+        assertEquals("alt3-value", tbc.alt3string);
     }
 
     @Test
