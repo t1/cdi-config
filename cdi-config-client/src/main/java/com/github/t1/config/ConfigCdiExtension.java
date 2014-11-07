@@ -77,11 +77,15 @@ public class ConfigCdiExtension implements Extension {
             Properties properties = new Properties();
             if (stream == null) {
                 log.error("config source not found {}", configSource);
-            } else {
+            } else if (configSource.getPath().endsWith(".properties")) {
                 properties.load(stream);
-                log.debug("loaded {} entries from {}", properties.size(), configSource);
-                resolveImports(properties);
+            } else if (configSource.getPath().endsWith(".xml")) {
+                properties.loadFromXML(stream);
+            } else {
+                log.error("unknown uri suffix in {}", Paths.get(configSource.getPath()).getFileName());
             }
+            log.debug("loaded {} entries from {}", properties.size(), configSource);
+            resolveImports(properties);
             return properties;
         } catch (IOException e) {
             throw new RuntimeException(e);

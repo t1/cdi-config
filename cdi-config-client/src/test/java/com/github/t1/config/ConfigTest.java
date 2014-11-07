@@ -52,6 +52,9 @@ public class ConfigTest extends AbstractTest {
         @Config(name = "alt3-string")
         String alt3string;
 
+        @Config(name = "xml-string")
+        String xmlString;
+
         @Produces
         Pojo producePojo() {
             return new Pojo(bool ? "foo" : "bar");
@@ -102,6 +105,11 @@ public class ConfigTest extends AbstractTest {
     @Test
     public void shouldConfigureFromIndirectlyImportedFile() {
         assertEquals("alt3-value", tbc.alt3string);
+    }
+
+    @Test
+    public void shouldConfigureFromXmlFile() {
+        assertEquals("xml-value", tbc.xmlString);
     }
 
     @Test
