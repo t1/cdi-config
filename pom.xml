@@ -10,6 +10,7 @@
         <module>cdi-config-common</module>
         <module>cdi-config-client</module>
         <module>cdi-config-service</module>
+        <module>cdi-config-tck</module>
     </modules>
 
     <name>CDI-Config</name>
