@@ -89,7 +89,7 @@ public class ConfigTest extends AbstractTest {
 
     @Test
     public void shouldUseConfigName() {
-        assertEquals("test-value", tbc.testString);
+        assertEquals("test-value2", tbc.testString);
     }
 
     @Test
