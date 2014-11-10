@@ -47,7 +47,7 @@ public class ConfigSourceLoader {
     }
 
     public ConfigSource load() {
-        return new ConfigSource(loadProperties(uri));
+        return new PropertiesConfigSource(loadProperties(uri));
     }
 
     private Properties loadProperties(URI uri) {

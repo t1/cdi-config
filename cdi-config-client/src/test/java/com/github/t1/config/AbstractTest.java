@@ -13,12 +13,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 abstract class AbstractTest {
     @Deployment
     public static JavaArchive loggingInterceptorDeployment() {
-        return ShrinkWrap
-                .create(JavaArchive.class)
-                .addClasses(Config.class, ConfigCdiExtension.class, ConfigurationPoint.class,
-                        InjectionTargetWrapper.class) //
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml") //
-        ;
+        return ShrinkWrap.create(JavaArchive.class).addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }
 
     @SneakyThrows(IOException.class)

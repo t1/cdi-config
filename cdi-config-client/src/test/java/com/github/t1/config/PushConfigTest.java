@@ -3,6 +3,7 @@ package com.github.t1.config;
 import static org.junit.Assert.*;
 
 import java.nio.file.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
@@ -21,7 +22,7 @@ public class PushConfigTest extends AbstractTest {
     @ToString
     static class ToBeConfigured {
         @Config(name = "alt-string")
-        private String string;
+        private AtomicReference<String> string;
     }
 
     @Inject
@@ -30,7 +31,7 @@ public class PushConfigTest extends AbstractTest {
     @Test
     @Ignore("not yet implemented")
     public void shouldConfigureString() throws Exception {
-        assertEquals("alt-value", tbc.string);
+        assertEquals("alt-value", tbc.string.get());
         assertEquals(CONFIG1, readFile(PATH));
 
         try {

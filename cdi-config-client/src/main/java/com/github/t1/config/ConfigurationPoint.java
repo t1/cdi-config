@@ -1,31 +1,25 @@
 package com.github.t1.config;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
-import javax.enterprise.inject.InjectionException;
-
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor
-class ConfigurationPoint {
-    private final Field field;
-    private final Object value;
-    private Object oldValue;
-
-    public void configure(Object target) {
-        try {
-            oldValue = field.get(target);
-            field.set(target, value);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new InjectionException("can't set " + field + " to a " + value.getClass().getSimpleName(), e);
-        }
+interface ConfigurationPoint {
+    public static Optional<ConfigurationPoint> on(Field field, ConfigSource configSource) {
+        Optional<Object> value = configSource.getValueFor(field);
+        if (!value.isPresent())
+            return Optional.empty();
+        return Optional.of(getConfigPointFor(field, value.get()));
     }
 
-    public void deconfigure(Object target) {
-        try {
-            field.set(target, oldValue);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new InjectionException("can't set " + field + " to old value", e);
-        }
+    public static ConfigurationPoint getConfigPointFor(Field field, Object value) {
+        field.setAccessible(true);
+        if (field.getType().isAssignableFrom(AtomicReference.class))
+            return new AtomicReferenceConfigurationPoint(field, value);
+        return new StandardConfigurationPoint(field, value);
     }
+
+    public void configure(Object target);
+
+    public void deconfigure(Object target);
 }
