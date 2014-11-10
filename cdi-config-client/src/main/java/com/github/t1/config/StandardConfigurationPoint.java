@@ -1,34 +1,35 @@
 package com.github.t1.config;
 
-import java.lang.reflect.Field;
-
-import javax.enterprise.inject.InjectionException;
-
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-class StandardConfigurationPoint implements ConfigurationPoint {
-    private final Field field;
-    private final Object value;
-    private Object oldValue;
-
+class StandardConfigurationPoint extends ConfigurationPoint {
     @Override
     public void configure(Object target) {
-        try {
-            oldValue = field.get(target);
-            field.set(target, value);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            String type = (value == null) ? null : value.getClass().getSimpleName();
-            throw new InjectionException("can't set " + field + " to a " + type, e);
-        }
+        set(target, value());
     }
 
     @Override
     public void deconfigure(Object target) {
-        try {
-            field.set(target, oldValue);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new InjectionException("can't set " + field + " to old value", e);
-        }
+        set(target, nullValue());
+    }
+
+    private Object nullValue() {
+        if (Boolean.class.equals(type()))
+            return false;
+        if (isInteger())
+            return 0;
+        if (isFloating())
+            return 0.0;
+        return null;
+    }
+
+    private boolean isInteger() {
+        return Byte.class.equals(type()) || Character.class.equals(type()) //
+                || Short.class.equals(type()) || Integer.class.equals(type()) || Long.class.equals(type());
+    }
+
+    private boolean isFloating() {
+        return Float.class.equals(type()) || Double.class.equals(type());
     }
 }
