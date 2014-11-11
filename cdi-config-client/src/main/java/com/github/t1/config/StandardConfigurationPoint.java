@@ -8,6 +8,11 @@ class StandardConfigurationPoint extends ConfigurationPoint {
     }
 
     @Override
+    protected Class<?> type() {
+        return getField().getType();
+    }
+
+    @Override
     public void configure(Object target) {
         set(target, value());
     }

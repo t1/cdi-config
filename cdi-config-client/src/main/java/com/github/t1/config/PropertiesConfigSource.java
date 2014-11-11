@@ -1,8 +1,7 @@
 package com.github.t1.config;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.enterprise.inject.spi.DefinitionException;
 
@@ -25,14 +24,7 @@ public class PropertiesConfigSource implements ConfigSource {
         // do *not* log the value to configure... could be a password
         log.debug("get value for {} field '{}' in {} to property '{}' to property '{}'", field.getType()
                 .getSimpleName(), field.getName(), field.getDeclaringClass(), propertyName);
-        configPoint.setValue(convert(type(field), value(field, propertyName)));
-    }
-
-    /** this duplicates some logic from the {@link ConfigurationPoint} class */
-    private Class<?> type(Field field) {
-        if (AtomicReference.class.isAssignableFrom(field.getType()))
-            return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-        return field.getType();
+        configPoint.setValue(convert(configPoint.type(), value(field, propertyName)));
     }
 
     protected <T> T convert(Class<T> type, String value) {

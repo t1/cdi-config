@@ -1,7 +1,6 @@
 package com.github.t1.config;
 
 import java.lang.reflect.Field;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.enterprise.inject.InjectionException;
@@ -16,14 +15,14 @@ import com.github.t1.stereotypes.Annotations;
  */
 @RequiredArgsConstructor
 abstract class ConfigurationPoint {
-    public static Optional<ConfigurationPoint> on(Field field) {
+    public static ConfigurationPoint on(Field field) {
         if (config(field) == null)
-            return Optional.empty();
+            return null;
         field.setAccessible(true);
-        return Optional.of((field.getType().isAssignableFrom(AtomicReference.class)) //
+        return (field.getType().isAssignableFrom(AtomicReference.class)) //
                 ? new AtomicReferenceConfigurationPoint(field) //
                 : new StandardConfigurationPoint(field) //
-                );
+        ;
     }
 
     private static Config config(Field field) {
@@ -44,12 +43,10 @@ abstract class ConfigurationPoint {
         return config(field);
     }
 
+    protected abstract Class<?> type();
+
     protected Object value() {
         return value;
-    }
-
-    protected Class<?> type() {
-        return field.getType();
     }
 
     protected Object get(Object target) {
