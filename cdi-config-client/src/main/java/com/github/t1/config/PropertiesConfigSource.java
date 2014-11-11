@@ -1,7 +1,7 @@
 package com.github.t1.config;
 
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.enterprise.inject.spi.DefinitionException;
@@ -21,15 +21,21 @@ public class PropertiesConfigSource implements ConfigSource {
     private final Properties properties;
 
     @Override
-    public Optional<Object> getValueFor(Field field) {
-        Config config = Annotations.on(field).getAnnotation(Config.class);
-        if (config == null)
-            return Optional.empty();
-        String propertyName = propertyName(config, field);
+    public boolean canConfigure(Field field) {
+        return (config(field) != null);
+    }
+
+    private Config config(Field field) {
+        return Annotations.on(field).getAnnotation(Config.class);
+    }
+
+    @Override
+    public Object getValueFor(Field field) {
+        String propertyName = propertyName(field);
         // do *not* log the value to configure... could be a password
         log.debug("get value for {} field '{}' in {} to property '{}' to property '{}'", field.getType()
                 .getSimpleName(), field.getName(), field.getDeclaringClass(), propertyName);
-        return Optional.of(convert(type(field), value(field, propertyName)));
+        return convert(type(field), value(field, propertyName));
     }
 
     private Class<?> type(Field field) {
@@ -51,8 +57,8 @@ public class PropertiesConfigSource implements ConfigSource {
         return stringValue;
     }
 
-    private String propertyName(Config config, Field field) {
-        String name = config.name();
+    private String propertyName(Field field) {
+        String name = config(field).name();
         return Config.USE_FIELD_NAME.equals(name) ? field.getName() : name;
     }
 }

@@ -8,11 +8,10 @@ import javax.enterprise.inject.InjectionException;
 
 abstract class ConfigurationPoint {
     public static Optional<ConfigurationPoint> on(Field field, ConfigSource configSource) {
-        Optional<Object> value = configSource.getValueFor(field);
-        if (!value.isPresent())
+        if (!configSource.canConfigure(field))
             return Optional.empty();
         ConfigurationPoint configurationPoint = createConfigPointFor(field);
-        configurationPoint.value = value.get();
+        configurationPoint.source = configSource;
         return Optional.of(configurationPoint);
     }
 
@@ -26,10 +25,10 @@ abstract class ConfigurationPoint {
     }
 
     private Field field;
-    private Object value;
+    private ConfigSource source;
 
     protected Object value() {
-        return value;
+        return source.getValueFor(field);
     }
 
     protected Class<?> type() {
