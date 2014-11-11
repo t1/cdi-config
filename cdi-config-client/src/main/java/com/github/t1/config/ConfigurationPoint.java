@@ -1,21 +1,18 @@
 package com.github.t1.config;
 
 import java.lang.reflect.Field;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.enterprise.inject.InjectionException;
 
-abstract class ConfigurationPoint {
-    public static Optional<ConfigurationPoint> on(Field field, ConfigSource configSource) {
-        if (!configSource.canConfigure(field))
-            return Optional.empty();
-        ConfigurationPoint configurationPoint = createConfigPointFor(field);
-        configurationPoint.source = configSource;
-        return Optional.of(configurationPoint);
-    }
+import lombok.Setter;
 
-    public static ConfigurationPoint createConfigPointFor(Field field) {
+/**
+ * The point where a configuration should go into, i.e. the field annotated as {@link Config}, i.e. on the class level,
+ * not the instance.
+ */
+abstract class ConfigurationPoint {
+    public static ConfigurationPoint on(Field field) {
         field.setAccessible(true);
         ConfigurationPoint configPoint = (field.getType().isAssignableFrom(AtomicReference.class)) //
                 ? new AtomicReferenceConfigurationPoint() //
@@ -25,6 +22,7 @@ abstract class ConfigurationPoint {
     }
 
     private Field field;
+    @Setter
     private ConfigSource source;
 
     protected Object value() {

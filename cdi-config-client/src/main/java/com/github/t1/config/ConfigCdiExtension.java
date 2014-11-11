@@ -57,9 +57,10 @@ public class ConfigCdiExtension implements Extension {
         List<ConfigurationPoint> configs = new ArrayList<>();
         for (Field field : type.getDeclaredFields()) {
             try {
-                Optional<ConfigurationPoint> configPoint = ConfigurationPoint.on(field, configSource());
-                if (configPoint.isPresent()) {
-                    configs.add(configPoint.get());
+                if (configSource().canConfigure(field)) {
+                    ConfigurationPoint configPoint = ConfigurationPoint.on(field);
+                    configPoint.setSource(configSource);
+                    configs.add(configPoint);
                 }
             } catch (DefinitionException e) {
                 pit.addDefinitionError(e);

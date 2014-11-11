@@ -38,6 +38,7 @@ public class PropertiesConfigSource implements ConfigSource {
         return convert(type(field), value(field, propertyName));
     }
 
+    /** this duplicates some logic from the {@link ConfigurationPoint} class */
     private Class<?> type(Field field) {
         if (AtomicReference.class.isAssignableFrom(field.getType()))
             return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
