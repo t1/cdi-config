@@ -22,13 +22,11 @@ public class PropertiesConfigSource implements ConfigSource {
         Field field = configPoint.getField();
         String propertyName = configPoint.propertyName();
         // do *not* log the value to configure... could be a password
-        log.debug("get value for {} field '{}' in {} to property '{}' to property '{}'", field.getType()
-                .getSimpleName(), field.getName(), field.getDeclaringClass(), propertyName);
-        configPoint.setValue(convert(configPoint.type(), value(field, propertyName)));
-    }
-
-    protected <T> T convert(Class<T> type, String value) {
-        return STRING_CONVERT.convertFromString(type, value);
+        log.debug("configure {} field '{}' in {} to property '{}'", field.getType().getSimpleName(), field.getName(),
+                field.getDeclaringClass(), propertyName);
+        String value = value(field, propertyName);
+        Object converted = convert(configPoint.type(), value);
+        configPoint.setValue(converted);
     }
 
     private String value(Field field, String propertyName) {
@@ -38,5 +36,9 @@ public class PropertiesConfigSource implements ConfigSource {
             throw new DefinitionException("no config value found for " + field);
         }
         return stringValue;
+    }
+
+    protected <T> T convert(Class<T> type, String value) {
+        return STRING_CONVERT.convertFromString(type, value);
     }
 }
