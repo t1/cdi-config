@@ -11,8 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.joda.convert.StringConvert;
 
-import com.github.t1.stereotypes.Annotations;
-
 @Slf4j
 @AllArgsConstructor
 public class PropertiesConfigSource implements ConfigSource {
@@ -21,21 +19,13 @@ public class PropertiesConfigSource implements ConfigSource {
     private final Properties properties;
 
     @Override
-    public boolean canConfigure(Field field) {
-        return (config(field) != null);
-    }
-
-    private Config config(Field field) {
-        return Annotations.on(field).getAnnotation(Config.class);
-    }
-
-    @Override
-    public Object getValueFor(Field field) {
-        String propertyName = propertyName(field);
+    public void configure(ConfigurationPoint configPoint) {
+        Field field = configPoint.getField();
+        String propertyName = configPoint.propertyName();
         // do *not* log the value to configure... could be a password
         log.debug("get value for {} field '{}' in {} to property '{}' to property '{}'", field.getType()
                 .getSimpleName(), field.getName(), field.getDeclaringClass(), propertyName);
-        return convert(type(field), value(field, propertyName));
+        configPoint.setValue(convert(type(field), value(field, propertyName)));
     }
 
     /** this duplicates some logic from the {@link ConfigurationPoint} class */
@@ -56,10 +46,5 @@ public class PropertiesConfigSource implements ConfigSource {
             throw new DefinitionException("no config value found for " + field);
         }
         return stringValue;
-    }
-
-    private String propertyName(Field field) {
-        String name = config(field).name();
-        return Config.USE_FIELD_NAME.equals(name) ? field.getName() : name;
     }
 }

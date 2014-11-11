@@ -1,9 +1,12 @@
 package com.github.t1.config;
 
-import lombok.RequiredArgsConstructor;
+import java.lang.reflect.Field;
 
-@RequiredArgsConstructor
 class StandardConfigurationPoint extends ConfigurationPoint {
+    public StandardConfigurationPoint(Field field) {
+        super(field);
+    }
+
     @Override
     public void configure(Object target) {
         set(target, value());

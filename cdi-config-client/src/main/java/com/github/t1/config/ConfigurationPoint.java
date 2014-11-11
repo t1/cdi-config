@@ -1,32 +1,51 @@
 package com.github.t1.config;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.enterprise.inject.InjectionException;
 
-import lombok.Setter;
+import lombok.*;
+
+import com.github.t1.stereotypes.Annotations;
 
 /**
  * The point where a configuration should go into, i.e. the field annotated as {@link Config}, i.e. on the class level,
  * not the instance.
  */
+@RequiredArgsConstructor
 abstract class ConfigurationPoint {
-    public static ConfigurationPoint on(Field field) {
+    public static Optional<ConfigurationPoint> on(Field field) {
+        if (config(field) == null)
+            return Optional.empty();
         field.setAccessible(true);
-        ConfigurationPoint configPoint = (field.getType().isAssignableFrom(AtomicReference.class)) //
-                ? new AtomicReferenceConfigurationPoint() //
-                : new StandardConfigurationPoint();
-        configPoint.field = field;
-        return configPoint;
+        return Optional.of((field.getType().isAssignableFrom(AtomicReference.class)) //
+                ? new AtomicReferenceConfigurationPoint(field) //
+                : new StandardConfigurationPoint(field) //
+                );
     }
 
-    private Field field;
+    private static Config config(Field field) {
+        return Annotations.on(field).getAnnotation(Config.class);
+    }
+
+    @Getter
+    private final Field field;
     @Setter
-    private ConfigSource source;
+    private Object value;
+
+    public String propertyName() {
+        String name = config().name();
+        return Config.USE_FIELD_NAME.equals(name) ? field.getName() : name;
+    }
+
+    public Config config() {
+        return config(field);
+    }
 
     protected Object value() {
-        return source.getValueFor(field);
+        return value;
     }
 
     protected Class<?> type() {
