@@ -20,7 +20,7 @@ public class PropertiesConfigSource implements ConfigSource {
     public void configure(ConfigurationPoint configPoint) {
         String value = value(configPoint);
         Object converted = convert(configPoint.type(), value);
-        configPoint.setValue(converted);
+        configPoint.setValue(new ConfigValue(converted));
     }
 
     private String value(ConfigurationPoint configPoint) {

@@ -36,7 +36,7 @@ abstract class ConfigurationPoint {
     @Getter(PROTECTED)
     private final Field field;
 
-    private Object value;
+    private ConfigValue value;
 
     public String propertyName() {
         String name = config().name();
@@ -49,9 +49,9 @@ abstract class ConfigurationPoint {
 
     protected abstract Class<?> type();
 
-    public void setValue(Object value) {
+    public void setValue(ConfigValue value) {
         // do *not* log the value to configure... could be, e.g., a password
-        log.debug("configure {} field '{}' in {}", type().getSimpleName(), field.getName(), field.getDeclaringClass());
+        log.debug("configure {}", this);
         this.value = value;
     }
 
@@ -73,7 +73,7 @@ abstract class ConfigurationPoint {
     }
 
     public void configure(Object target) {
-        configure(target, value);
+        configure(target, value.getValue());
     }
 
     public abstract void configure(Object target, Object value);
@@ -86,6 +86,6 @@ abstract class ConfigurationPoint {
 
     @Override
     public String toString() {
-        return field.toString();
+        return type().getSimpleName() + " field '" + field.getName() + "' in " + field.getDeclaringClass();
     }
 }
