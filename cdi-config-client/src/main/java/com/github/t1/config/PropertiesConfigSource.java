@@ -18,19 +18,20 @@ public class PropertiesConfigSource implements ConfigSource {
 
     @Override
     public void configure(ConfigurationPoint configPoint) {
-        String value = value(configPoint);
-        Object converted = convert(configPoint.type(), value);
-        configPoint.setValue(new ConfigValue(converted));
-    }
-
-    private String value(ConfigurationPoint configPoint) {
-        String propertyName = configPoint.propertyName();
+        String propertyName = propertyName(configPoint);
         String stringValue = properties.getProperty(propertyName);
         if (stringValue == null) {
             log.error("can't configure {}", configPoint);
             throw new DefinitionException("no config value found for " + configPoint);
         }
-        return stringValue;
+        String value = stringValue;
+        Object converted = convert(configPoint.type(), value);
+        configPoint.setValue(new PropertyConfigValue(converted, propertyName));
+    }
+
+    public String propertyName(ConfigurationPoint configPoint) {
+        String name = configPoint.config().name();
+        return Config.USE_FIELD_NAME.equals(name) ? configPoint.fieldName() : name;
     }
 
     protected <T> T convert(Class<T> type, String value) {

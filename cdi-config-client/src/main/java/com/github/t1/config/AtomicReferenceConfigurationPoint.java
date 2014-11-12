@@ -29,7 +29,7 @@ class AtomicReferenceConfigurationPoint extends ConfigurationPoint {
     }
 
     @Override
-    public void deconfigure(Object target) {
+    public void removeConfigTarget(Object target) {
         setField(target, null);
     }
 

@@ -38,9 +38,8 @@ abstract class ConfigurationPoint {
 
     private ConfigValue value;
 
-    public String propertyName() {
-        String name = config().name();
-        return Config.USE_FIELD_NAME.equals(name) ? field.getName() : name;
+    public String fieldName() {
+        return field.getName();
     }
 
     public Config config() {
@@ -50,9 +49,9 @@ abstract class ConfigurationPoint {
     protected abstract Class<?> type();
 
     public void setValue(ConfigValue value) {
+        this.value = value;
         // do *not* log the value to configure... could be, e.g., a password
         log.debug("configure {}", this);
-        this.value = value;
     }
 
     protected Object getField(Object target) {
@@ -72,13 +71,13 @@ abstract class ConfigurationPoint {
         }
     }
 
-    public void configure(Object target) {
+    public void addConfigTarget(Object target) {
         configure(target, value.getValue());
     }
 
     public abstract void configure(Object target, Object value);
 
-    public void deconfigure(Object target) {
+    public void removeConfigTarget(Object target) {
         configure(target, nullValue());
     }
 
@@ -86,6 +85,7 @@ abstract class ConfigurationPoint {
 
     @Override
     public String toString() {
-        return type().getSimpleName() + " field '" + field.getName() + "' in " + field.getDeclaringClass();
+        return type().getSimpleName() + " field '" + field.getName() + "' in " + field.getDeclaringClass() //
+                + " to " + ((value == null) ? null : value.getConfigSourceInfo());
     }
 }

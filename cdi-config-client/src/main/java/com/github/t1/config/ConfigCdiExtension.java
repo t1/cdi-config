@@ -21,11 +21,11 @@ public class ConfigCdiExtension implements Extension {
 
         @Override
         public void inject(T instance, CreationalContext<T> ctx) {
-            for (ConfigurationPoint configurationPoint : configs) {
-                configurationPoint.configure(instance);
-            }
+            log.debug("add config targets in {}", instance);
 
-            log.debug("configured {}", instance);
+            for (ConfigurationPoint configurationPoint : configs) {
+                configurationPoint.addConfigTarget(instance);
+            }
 
             super.inject(instance, ctx);
         }
@@ -34,10 +34,10 @@ public class ConfigCdiExtension implements Extension {
         public void preDestroy(T instance) {
             super.preDestroy(instance);
 
-            log.debug("deconfigure {}", instance);
+            log.debug("remove config target in {}", instance);
 
             for (ConfigurationPoint configurationPoint : configs) {
-                configurationPoint.deconfigure(instance);
+                configurationPoint.removeConfigTarget(instance);
             }
         }
     }
