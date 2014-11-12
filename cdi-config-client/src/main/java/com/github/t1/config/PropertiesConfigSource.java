@@ -1,6 +1,5 @@
 package com.github.t1.config;
 
-import java.lang.reflect.Field;
 import java.util.Properties;
 
 import javax.enterprise.inject.spi.DefinitionException;
@@ -19,21 +18,17 @@ public class PropertiesConfigSource implements ConfigSource {
 
     @Override
     public void configure(ConfigurationPoint configPoint) {
-        Field field = configPoint.getField();
-        String propertyName = configPoint.propertyName();
-        // do *not* log the value to configure... could be a password
-        log.debug("configure {} field '{}' in {} to property '{}'", field.getType().getSimpleName(), field.getName(),
-                field.getDeclaringClass(), propertyName);
-        String value = value(field, propertyName);
+        String value = value(configPoint);
         Object converted = convert(configPoint.type(), value);
         configPoint.setValue(converted);
     }
 
-    private String value(Field field, String propertyName) {
+    private String value(ConfigurationPoint configPoint) {
+        String propertyName = configPoint.propertyName();
         String stringValue = properties.getProperty(propertyName);
         if (stringValue == null) {
-            log.error("can't configure {}", field);
-            throw new DefinitionException("no config value found for " + field);
+            log.error("can't configure {}", configPoint);
+            throw new DefinitionException("no config value found for " + configPoint);
         }
         return stringValue;
     }

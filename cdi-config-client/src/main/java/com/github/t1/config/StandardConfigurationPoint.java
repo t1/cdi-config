@@ -13,16 +13,12 @@ class StandardConfigurationPoint extends ConfigurationPoint {
     }
 
     @Override
-    public void configure(Object target) {
-        set(target, value());
+    public void configure(Object target, Object value) {
+        setField(target, value);
     }
 
     @Override
-    public void deconfigure(Object target) {
-        set(target, nullValue());
-    }
-
-    private Object nullValue() {
+    protected Object nullValue() {
         if (Boolean.class.equals(type()))
             return false;
         if (isInteger())

@@ -1,18 +1,22 @@
 package com.github.t1.config;
 
+import static lombok.AccessLevel.*;
+
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.enterprise.inject.InjectionException;
 
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import com.github.t1.stereotypes.Annotations;
 
 /**
- * The point where a configuration should go into, i.e. the field annotated as {@link Config}, i.e. on the class level,
- * not the instance.
+ * The point where a configuration should go into, i.e. the field annotated as {@link Config} on the class level, not
+ * the instance.
  */
+@Slf4j
 @RequiredArgsConstructor
 abstract class ConfigurationPoint {
     public static ConfigurationPoint on(Field field) {
@@ -29,9 +33,9 @@ abstract class ConfigurationPoint {
         return Annotations.on(field).getAnnotation(Config.class);
     }
 
-    @Getter
+    @Getter(PROTECTED)
     private final Field field;
-    @Setter
+
     private Object value;
 
     public String propertyName() {
@@ -45,11 +49,13 @@ abstract class ConfigurationPoint {
 
     protected abstract Class<?> type();
 
-    protected Object value() {
-        return value;
+    public void setValue(Object value) {
+        // do *not* log the value to configure... could be, e.g., a password
+        log.debug("configure {} field '{}' in {}", type().getSimpleName(), field.getName(), field.getDeclaringClass());
+        this.value = value;
     }
 
-    protected Object get(Object target) {
+    protected Object getField(Object target) {
         try {
             return field.get(target);
         } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -57,7 +63,7 @@ abstract class ConfigurationPoint {
         }
     }
 
-    protected void set(Object target, Object value) {
+    protected void setField(Object target, Object value) {
         try {
             field.set(target, value);
         } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -66,7 +72,20 @@ abstract class ConfigurationPoint {
         }
     }
 
-    public abstract void configure(Object target);
+    public void configure(Object target) {
+        configure(target, value);
+    }
 
-    public abstract void deconfigure(Object target);
+    public abstract void configure(Object target, Object value);
+
+    public void deconfigure(Object target) {
+        configure(target, nullValue());
+    }
+
+    protected abstract Object nullValue();
+
+    @Override
+    public String toString() {
+        return field.toString();
+    }
 }

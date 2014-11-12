@@ -14,22 +14,27 @@ class AtomicReferenceConfigurationPoint extends ConfigurationPoint {
     }
 
     @Override
-    public void configure(Object target) {
-        ref(target).set(value());
+    public void configure(Object target, Object value) {
+        ref(target).set(value);
     }
 
     private AtomicReference<Object> ref(Object target) {
         @SuppressWarnings("unchecked")
-        AtomicReference<Object> ref = (AtomicReference<Object>) get(target);
+        AtomicReference<Object> ref = (AtomicReference<Object>) getField(target);
         if (ref == null) {
             ref = new AtomicReference<>();
-            set(target, ref);
+            setField(target, ref);
         }
         return ref;
     }
 
     @Override
     public void deconfigure(Object target) {
-        set(target, null);
+        setField(target, null);
+    }
+
+    @Override
+    protected Object nullValue() {
+        return null;
     }
 }
