@@ -14,7 +14,7 @@ class AtomicReferenceConfigurationPoint extends ConfigurationPoint {
     }
 
     @Override
-    public void configure(Object target, Object value) {
+    public void set(Object target, Object value) {
         ref(target).set(value);
     }
 

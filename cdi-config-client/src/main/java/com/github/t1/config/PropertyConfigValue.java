@@ -1,15 +1,20 @@
 package com.github.t1.config;
 
-import lombok.*;
+import lombok.Getter;
 
-@Getter
-@AllArgsConstructor
-public class PropertyConfigValue implements ConfigValue {
-    private final Object value;
-    private final String propertyName;
+public class PropertyConfigValue extends ConfigValue {
+    private final String stringValue;
+    @Getter
+    private final String configSourceInfo;
+
+    public PropertyConfigValue(ConfigurationPoint configPoint, String stringValue, String configSourceInfo) {
+        super(configPoint);
+        this.stringValue = stringValue;
+        this.configSourceInfo = configSourceInfo;
+    }
 
     @Override
-    public String getConfigSourceInfo() {
-        return "property '" + propertyName + "' from properties config source";
+    public Object getValue() {
+        return convert(configPoint().type(), stringValue);
     }
 }

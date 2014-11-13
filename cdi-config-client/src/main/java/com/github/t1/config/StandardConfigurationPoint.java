@@ -13,7 +13,7 @@ class StandardConfigurationPoint extends ConfigurationPoint {
     }
 
     @Override
-    public void configure(Object target, Object value) {
+    public void set(Object target, Object value) {
         setField(target, value);
     }
 
