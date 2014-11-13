@@ -32,9 +32,4 @@ class AtomicReferenceConfigurationPoint extends ConfigurationPoint {
     public void removeConfigTarget(Object target) {
         setField(target, null);
     }
-
-    @Override
-    protected Object nullValue() {
-        return null;
-    }
 }

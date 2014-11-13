@@ -78,10 +78,8 @@ abstract class ConfigurationPoint {
     public abstract void set(Object target, Object value);
 
     public void removeConfigTarget(Object target) {
-        set(target, nullValue());
+        configValue.removeConfigTartet(target);
     }
-
-    protected abstract Object nullValue();
 
     @Override
     public String toString() {

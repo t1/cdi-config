@@ -16,24 +16,4 @@ class StandardConfigurationPoint extends ConfigurationPoint {
     public void set(Object target, Object value) {
         setField(target, value);
     }
-
-    @Override
-    protected Object nullValue() {
-        if (Boolean.class.equals(type()))
-            return false;
-        if (isInteger())
-            return 0;
-        if (isFloating())
-            return 0.0;
-        return null;
-    }
-
-    private boolean isInteger() {
-        return Byte.class.equals(type()) || Character.class.equals(type()) //
-                || Short.class.equals(type()) || Integer.class.equals(type()) || Long.class.equals(type());
-    }
-
-    private boolean isFloating() {
-        return Float.class.equals(type()) || Double.class.equals(type());
-    }
 }

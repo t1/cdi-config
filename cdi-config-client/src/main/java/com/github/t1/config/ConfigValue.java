@@ -18,12 +18,11 @@ public abstract class ConfigValue {
         return STRING_CONVERT.convertFromString(type, value);
     }
 
-    protected abstract Object getValue();
-
     /** do *not* log the value to configure... could be, e.g., a password */
     public abstract String getConfigSourceInfo();
 
-    public void addConfigTartet(Object target) {
-        configPoint.set(target, getValue());
-    }
+    public abstract void addConfigTartet(Object target);
+
+    /** nothing to do by default */
+    public void removeConfigTartet(@SuppressWarnings("unused") Object target) {}
 }
