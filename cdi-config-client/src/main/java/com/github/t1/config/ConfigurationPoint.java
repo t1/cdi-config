@@ -54,6 +54,10 @@ abstract class ConfigurationPoint {
         log.debug("configure {}", this);
     }
 
+    public boolean isConfigured() {
+        return configValue != null;
+    }
+
     protected Object getField(Object target) {
         try {
             return field.get(target);
@@ -75,15 +79,15 @@ abstract class ConfigurationPoint {
         configValue.addConfigTartet(target);
     }
 
-    public abstract void set(Object target, Object value);
-
     public void removeConfigTarget(Object target) {
         configValue.removeConfigTartet(target);
     }
 
+    public abstract void set(Object target, Object value);
+
     @Override
     public String toString() {
         return type().getSimpleName() + " field '" + field.getName() + "' in " + field.getDeclaringClass() //
-                + " to " + configValue.getConfigSourceInfo();
+                + " to " + configValue;
     }
 }

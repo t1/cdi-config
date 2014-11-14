@@ -60,6 +60,10 @@ public class ConfigCdiExtension implements Extension {
                 ConfigurationPoint configPoint = ConfigurationPoint.on(field);
                 if (configPoint != null) {
                     configSource().configure(configPoint);
+                    if (!configPoint.isConfigured()) {
+                        log.error("can't configure {}", configPoint);
+                        throw new DefinitionException("no config value found for " + configPoint);
+                    }
                     configs.add(configPoint);
                 }
             } catch (DefinitionException e) {

@@ -1,10 +1,10 @@
 package com.github.t1.config;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import org.joda.convert.StringConvert;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public abstract class ConfigValue {
     private static final StringConvert STRING_CONVERT = StringConvert.INSTANCE;
 
@@ -18,11 +18,16 @@ public abstract class ConfigValue {
         return STRING_CONVERT.convertFromString(type, value);
     }
 
-    /** do *not* log the value to configure... could be, e.g., a password */
-    public abstract String getConfigSourceInfo();
-
     public abstract void addConfigTartet(Object target);
 
-    /** nothing to do by default */
-    public void removeConfigTartet(@SuppressWarnings("unused") Object target) {}
+    public abstract void removeConfigTartet(Object target);
+
+    /**
+     * Do <em>not</em> produce the actual value... could be, e.g., a password. <br/>
+     * And take care to not recurse into {@link ConfigurationPoint#toString()}
+     */
+    @Override
+    public String toString() {
+        return "config value for '" + configPoint.name() + "'";
+    }
 }
