@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
-import lombok.*;
+import lombok.ToString;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.*;

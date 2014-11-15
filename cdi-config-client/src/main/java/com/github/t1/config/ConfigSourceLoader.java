@@ -1,11 +1,6 @@
 package com.github.t1.config;
 
-import java.io.*;
 import java.net.*;
-import java.nio.file.*;
-import java.util.Properties;
-
-import javax.enterprise.inject.spi.DefinitionException;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +34,8 @@ public class ConfigSourceLoader {
         if ("java".equals(uri.getScheme())) {
             return insantiate(uri.getSchemeSpecificPart());
         } else {
-            Properties properties = loadProperties(uri);
-            PropertiesConfigSource configSource = new PropertiesConfigSource(uri, properties);
-            return resolveImports(properties, configSource);
+            PropertiesConfigSource configSource = new PropertiesConfigSource(uri);
+            return resolveImports(configSource);
         }
     }
 
@@ -51,48 +45,11 @@ public class ConfigSourceLoader {
         return (ConfigSource) type.newInstance();
     }
 
-    private Properties loadProperties(URI uri) {
-        Path path = Paths.get(uri.getSchemeSpecificPart());
-        if (path.startsWith(".")) {
-            uri = subpath(path, 1).toUri();
-        } else if (path.startsWith("~")) {
-            Path home = Paths.get(System.getProperty("user.home"));
-            uri = home.resolve(subpath(path, 1)).toUri();
-        }
-        try (InputStream stream = url(uri).openStream()) {
-            Properties properties = new Properties();
-            if (stream == null) {
-                log.error("config source not found {}", uri);
-            } else if (uri.getPath().endsWith(".properties")) {
-                properties.load(stream);
-            } else if (uri.getPath().endsWith(".xml")) {
-                properties.loadFromXML(stream);
-            } else {
-                log.error("unknown uri suffix in {}", Paths.get(uri.getPath()).getFileName());
-            }
-            log.debug("loaded {} entries from {}", properties.size(), uri);
-            return properties;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private URL url(URI uri) {
-        try {
-            return uri.toURL();
-        } catch (MalformedURLException e) {
-            throw new DefinitionException(e);
-        }
-    }
-
-    private static Path subpath(Path path, int beginIndex) {
-        return path.subpath(beginIndex, path.getNameCount());
-    }
-
-    private ConfigSource resolveImports(Properties properties, ConfigSource result) {
-        for (String key : properties.stringPropertyNames()) {
+    private ConfigSource resolveImports(PropertiesConfigSource properties) {
+        ConfigSource result = properties;
+        for (String key : properties.propertyNames()) {
             if (key.startsWith("*import*")) {
-                String value = (String) properties.remove(key);
+                String value = properties.removeProperty(key);
                 log.debug("resolve import {}: {}", key, value);
                 URI importUri = URI.create(value);
                 ConfigSource resolvedSource = loadConfigSource(importUri);
@@ -102,3 +59,30 @@ public class ConfigSourceLoader {
         return result;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
