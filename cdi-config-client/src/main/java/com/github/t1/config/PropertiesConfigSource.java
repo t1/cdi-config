@@ -19,7 +19,7 @@ public class PropertiesConfigSource implements ConfigSource {
         protected Object getValue() {
             Property property = getProperty(configPoint());
             String value = (property == null) ? null : property.value;
-            return convert(configPoint().type(), value);
+            return convert(value);
         }
 
         @Override

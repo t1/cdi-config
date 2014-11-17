@@ -61,9 +61,6 @@ public class UpdateConfigTest extends AbstractTest {
 
     @Test
     public void shouldUpdateFromFileChange() throws Exception {
-        System.out.println("---------------------------------------------");
-        System.getProperties().store(System.out, null);
-        System.out.println("---------------------------------------------");
         assertEquals("alt-value", tbc.altString.get());
         assertEquals(CONFIG1, readFile(PATH));
 

@@ -3,16 +3,15 @@ package com.github.t1.config;
 import java.net.*;
 import java.util.ArrayList;
 
-import lombok.*;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@AllArgsConstructor
 public class ConfigSourceLoader {
     private final URI uri;
 
     public ConfigSourceLoader() {
-        this(rootConfigSourceUri());
+        this.uri = rootConfigSourceUri();
     }
 
     @SneakyThrows(URISyntaxException.class)
@@ -27,7 +26,9 @@ public class ConfigSourceLoader {
     }
 
     public ConfigSource load() {
-        return loadConfigSource(uri);
+        return MultiConfigSource.of( //
+                new SystemPropertiesConfigSource(), //
+                loadConfigSource(uri));
     }
 
     private ConfigSource loadConfigSource(URI uri) {

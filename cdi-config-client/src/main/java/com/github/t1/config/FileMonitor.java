@@ -45,7 +45,12 @@ public class FileMonitor {
     private Thread thread;
 
     @Setter
-    private long interval = 1_000;
+    private long interval = initInterval();
+
+    private int initInterval() {
+        String property = System.getProperty(FileMonitor.class.getName() + ".interval");
+        return (property == null) ? 1_000 : Integer.parseInt(property);
+    }
 
     private void start() {
         if (thread == null) {
@@ -54,11 +59,11 @@ public class FileMonitor {
 
                 @Override
                 public void run() {
-                    log.debug("start watcher thread");
+                    log.debug("start watcher thread with interval {}", interval);
                     run: while (!watchers.isEmpty()) {
                         try {
                             Thread.sleep(interval);
-                            log.debug("run {}", count++);
+                            log.trace("run {}", count++);
 
                             for (FileWatcher watcher : watchers) {
                                 watcher.run();

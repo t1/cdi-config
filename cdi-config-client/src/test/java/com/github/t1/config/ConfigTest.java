@@ -55,6 +55,9 @@ public class ConfigTest extends AbstractTest {
         @Config(name = "xml-string")
         String xmlString;
 
+        @Config(name = "user.home")
+        String home;
+
         @Produces
         Pojo producePojo() {
             return new Pojo(bool ? "foo" : "bar");
@@ -113,6 +116,11 @@ public class ConfigTest extends AbstractTest {
     @Test
     public void shouldConfigureFromXmlFile() {
         assertEquals("xml-value", tbc.xmlString);
+    }
+
+    @Test
+    public void shouldConfigureFromSystemProperty() {
+        assertEquals(System.getProperty("user.home"), tbc.home);
     }
 
     @Test

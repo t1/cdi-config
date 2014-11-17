@@ -14,8 +14,8 @@ public abstract class ConfigValue {
         return configPoint;
     }
 
-    protected <T> T convert(Class<T> type, String value) {
-        return STRING_CONVERT.convertFromString(type, value);
+    protected Object convert(String value) {
+        return STRING_CONVERT.convertFromString(configPoint.type(), value);
     }
 
     public abstract void addConfigTartet(Object target);

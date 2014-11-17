@@ -42,7 +42,7 @@ abstract class ConfigurationPoint {
         return config(field);
     }
 
-    protected String name() {
+    public String name() {
         String name = config().name();
         return Config.USE_FIELD_NAME.equals(name) ? field.getName() : name;
     }
