@@ -17,8 +17,9 @@ public class PropertiesConfigSource implements ConfigSource {
 
         @Override
         protected Object getValue() {
-            String property = getProperty(configPoint());
-            return convert(configPoint().type(), property);
+            Property property = getProperty(configPoint());
+            String value = (property == null) ? null : property.value;
+            return convert(configPoint().type(), value);
         }
 
         @Override
@@ -27,16 +28,47 @@ public class PropertiesConfigSource implements ConfigSource {
         }
     }
 
+    private static class Property {
+        private String value;
+        private final List<PropertyConfigValue> configs = new ArrayList<>();
+
+        public Property(String value) {
+            this.value = value;
+        }
+
+        public void add(PropertyConfigValue configValue) {
+            configs.add(configValue);
+        }
+
+        public boolean updateValue(String newValue) {
+            if (value.equals(newValue))
+                return false;
+            value = newValue;
+            for (PropertyConfigValue config : configs) {
+                config.updateAllConfigTargets();
+            }
+            return true;
+        }
+    }
+
     private final URI uri;
-    private final Properties properties;
+    private final Map<String, Property> properties;
 
     private static FileMonitor FILE_MONITOR = new FileMonitor();
 
     public PropertiesConfigSource(URI uri) {
         this.uri = resolve(uri);
-        this.properties = load();
+        this.properties = toPropertyMap(load());
 
         initMonitor();
+    }
+
+    private Map<String, Property> toPropertyMap(Properties in) {
+        Map<String, Property> out = new HashMap<>();
+        for (String name : in.stringPropertyNames()) {
+            out.put(name, new Property(in.getProperty(name)));
+        }
+        return out;
     }
 
     private URI resolve(URI uri) {
@@ -84,25 +116,43 @@ public class PropertiesConfigSource implements ConfigSource {
                 @Override
                 public void run() {
                     log.debug("{} changed", uri);
-                    // TODO reload properties and update all changed config values
+                    update();
                 }
             });
         }
     }
 
-    public void stop() {
-        FILE_MONITOR.remove(Paths.get(uri));
+    private void update() {
+        Properties newProperties = load();
+        ArrayList<String> keys = new ArrayList<>(newProperties.stringPropertyNames());
+        for (String key : keys) {
+            String newValue = (String) newProperties.remove(key);
+            Property property = properties.get(key);
+            if (property == null) {
+                log.error("property '{}' was added to {}... ignoring", key, uri);
+            } else {
+                if (property.updateValue(newValue)) {
+                    log.debug("update property '{}' from {}", key, uri);
+                }
+            }
+        }
+        for (String missingKey : newProperties.stringPropertyNames()) {
+            log.error("property '{}' was removed from {}... ignoring", missingKey, uri);
+        }
     }
 
     @Override
     public void configure(ConfigurationPoint configPoint) {
-        if (getProperty(configPoint) == null)
+        Property property = getProperty(configPoint);
+        if (property == null)
             return;
-        configPoint.setConfigValue(new PropertyConfigValue(configPoint));
+        PropertyConfigValue configValue = new PropertyConfigValue(configPoint);
+        property.add(configValue);
+        configPoint.setConfigValue(configValue);
     }
 
-    private String getProperty(ConfigurationPoint configPoint) {
-        return properties.getProperty(configPoint.name());
+    private Property getProperty(ConfigurationPoint configPoint) {
+        return properties.get(configPoint.name());
     }
 
     @Override
@@ -110,11 +160,17 @@ public class PropertiesConfigSource implements ConfigSource {
         return properties.size() + " properties from " + uri;
     }
 
-    public Set<String> propertyNames() {
-        return properties.stringPropertyNames();
+    Set<String> propertyNames() {
+        return properties.keySet();
     }
 
-    public String removeProperty(String key) {
-        return (String) properties.remove(key);
+    String removeProperty(String key) {
+        Property removed = properties.remove(key);
+        return (removed == null) ? null : removed.value;
+    }
+
+    @Override
+    public void shutdown() {
+        FILE_MONITOR.remove(Paths.get(uri));
     }
 }

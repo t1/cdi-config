@@ -67,6 +67,9 @@ public class ConfigTest extends AbstractTest {
     @Inject
     Pojo pojo;
 
+    @Rule
+    public TestLoggerRule logger = new TestLoggerRule();
+
     @Test
     public void shouldConfigureString() {
         assertEquals("test-value", tbc.string);

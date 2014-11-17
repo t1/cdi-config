@@ -24,6 +24,9 @@ public class UpdateConfigTest extends AbstractTest {
                 configPoint.setConfigValue(configValue);
             }
         }
+
+        @Override
+        public void shutdown() {}
     }
 
     private static final Path PATH = Paths.get("target/test-classes/configuration-alt.properties");
@@ -43,6 +46,9 @@ public class UpdateConfigTest extends AbstractTest {
     @Inject
     ToBeConfigured tbc;
 
+    @Rule
+    public TestLoggerRule logger = new TestLoggerRule();
+
     @Test
     public void shouldUpdateFromJavaClass() {
         assertEquals("initial-value", tbc.javaConfigString.get());
@@ -54,17 +60,25 @@ public class UpdateConfigTest extends AbstractTest {
     }
 
     @Test
-    @Ignore("not yet implemented")
     public void shouldUpdateFromFileChange() throws Exception {
+        System.out.println("---------------------------------------------");
+        System.getProperties().store(System.out, null);
+        System.out.println("---------------------------------------------");
         assertEquals("alt-value", tbc.altString.get());
         assertEquals(CONFIG1, readFile(PATH));
 
         try {
             Files.write(PATH, CONFIG2.getBytes());
 
-            Thread.sleep(200);
+            for (int i = 0; i < 40; i++) {
+                System.out.println("wait " + i);
+                Thread.sleep(50);
 
-            assertEquals("alt-value2", tbc.altString.get());
+                if ("alt-value2".equals(tbc.altString.get())) {
+                    return;
+                }
+            }
+            fail("expected altString to change to alt-value2, but it's still " + tbc.altString.get());
         } finally {
             Files.write(PATH, CONFIG1.getBytes());
         }

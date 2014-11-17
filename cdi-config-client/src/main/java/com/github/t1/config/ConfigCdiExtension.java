@@ -21,11 +21,11 @@ public class ConfigCdiExtension implements Extension {
 
         @Override
         public void inject(T instance, CreationalContext<T> ctx) {
-            log.debug("add config targets in {}", instance);
-
+            log.trace("add config targets in {}", instance);
             for (ConfigurationPoint configurationPoint : configs) {
                 configurationPoint.addConfigTarget(instance);
             }
+            log.trace("done adding config targets in {}", instance);
 
             super.inject(instance, ctx);
         }
@@ -34,11 +34,11 @@ public class ConfigCdiExtension implements Extension {
         public void preDestroy(T instance) {
             super.preDestroy(instance);
 
-            log.debug("remove config target in {}", instance);
-
+            log.trace("remove config targets in {}", instance);
             for (ConfigurationPoint configurationPoint : configs) {
                 configurationPoint.removeConfigTarget(instance);
             }
+            log.trace("done removing config targets in {}", instance);
         }
     }
 
@@ -75,5 +75,12 @@ public class ConfigCdiExtension implements Extension {
             InjectionTarget<T> it = pit.getInjectionTarget();
             pit.setInjectionTarget(new ConfiguringInjectionTarget<>(it, configs));
         }
+    }
+
+    public void beforeShutdown(@SuppressWarnings("unused") @Observes BeforeShutdown beforeShutdown) {
+        log.debug("shutdown start");
+        if (configSource != null)
+            configSource.shutdown();
+        log.debug("shutdown done");
     }
 }

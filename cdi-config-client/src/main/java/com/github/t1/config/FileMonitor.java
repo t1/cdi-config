@@ -12,9 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 public class FileMonitor {
     private static int fileMonitorThreadCount;
 
-    @Setter
-    private long interval = 1_000;
-
     private static class FileWatcher {
         private final Path path;
         private FileTime lastModified;
@@ -37,10 +34,18 @@ public class FileMonitor {
                 runnable.run();
             }
         }
+
+        @Override
+        public String toString() {
+            return "file watcher for " + path;
+        }
     }
 
     private final List<FileWatcher> watchers = new ArrayList<>();
     private Thread thread;
+
+    @Setter
+    private long interval = 1_000;
 
     private void start() {
         if (thread == null) {
@@ -59,6 +64,7 @@ public class FileMonitor {
                                 watcher.run();
                             }
                         } catch (InterruptedException e) {
+                            log.debug("watcher thread interrupted");
                             break run;
                         }
                     }
@@ -72,18 +78,37 @@ public class FileMonitor {
     }
 
     public void add(Path path, Runnable runnable) {
+        log.debug("add watcher for {}", path);
         this.watchers.add(new FileWatcher(path, runnable));
         start();
     }
 
     public void remove(Path path) {
-        this.watchers.remove(path);
-        if (watchers.isEmpty()) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+        log.debug("remove watcher for {}", path);
+        FileWatcher watcher = findFor(path);
+        if (watcher == null) {
+            log.warn("tried to remove unknown watcher for {}", path);
+        } else {
+            this.watchers.remove(watcher);
+            if (watchers.isEmpty()) {
+                log.info("wait for watcher thread to stop");
+                try {
+                    thread.interrupt();
+                    thread.join();
+                    thread = null;
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
+    }
+
+    private FileWatcher findFor(Path path) {
+        for (FileWatcher watcher : watchers) {
+            if (watcher.path.equals(path)) {
+                return watcher;
+            }
+        }
+        return null;
     }
 }

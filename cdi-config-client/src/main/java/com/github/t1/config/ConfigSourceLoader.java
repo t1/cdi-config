@@ -1,6 +1,7 @@
 package com.github.t1.config;
 
 import java.net.*;
+import java.util.ArrayList;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,7 @@ public class ConfigSourceLoader {
 
     private ConfigSource resolveImports(PropertiesConfigSource properties) {
         ConfigSource result = properties;
-        for (String key : properties.propertyNames()) {
+        for (String key : new ArrayList<>(properties.propertyNames())) {
             if (key.startsWith("*import*")) {
                 String value = properties.removeProperty(key);
                 log.debug("resolve import {}: {}", key, value);
@@ -59,30 +60,3 @@ public class ConfigSourceLoader {
         return result;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -41,4 +41,11 @@ class MultiConfigSource implements ConfigSource {
     public String toString() {
         return "multi:" + sources;
     }
+
+    @Override
+    public void shutdown() {
+        for (ConfigSource source : sources) {
+            source.shutdown();
+        }
+    }
 }

@@ -29,7 +29,7 @@ public class TestClient {
 
         Thread.sleep(2_000);
 
-        configSource.stop();
+        configSource.shutdown();
         log.debug("end");
     }
 }
