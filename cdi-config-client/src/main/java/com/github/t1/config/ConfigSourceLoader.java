@@ -19,7 +19,12 @@ public class ConfigSourceLoader {
         String systemProperty = System.getProperty("cdi-config.config-source");
         if (systemProperty == null) {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            return classLoader.getResource("configuration.properties").toURI();
+            if (classLoader == null)
+                classLoader = ClassLoader.getSystemClassLoader();
+            URL resource = classLoader.getResource("configuration.properties");
+            if (resource == null)
+                throw new RuntimeException("no file configuration.properties found");
+            return resource.toURI();
         } else {
             return URI.create(systemProperty);
         }
