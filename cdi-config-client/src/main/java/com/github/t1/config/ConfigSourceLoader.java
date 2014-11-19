@@ -41,7 +41,7 @@ public class ConfigSourceLoader {
         if ("java".equals(uri.getScheme())) {
             return insantiate(uri.getSchemeSpecificPart());
         } else {
-            PropertiesConfigSource configSource = new PropertiesConfigSource(uri);
+            PropertiesFileConfigSource configSource = new PropertiesFileConfigSource(uri);
             return resolveImports(configSource);
         }
     }
@@ -52,7 +52,7 @@ public class ConfigSourceLoader {
         return (ConfigSource) type.newInstance();
     }
 
-    private ConfigSource resolveImports(PropertiesConfigSource properties) {
+    private ConfigSource resolveImports(PropertiesFileConfigSource properties) {
         ConfigSource result = properties;
         for (String key : new ArrayList<>(properties.propertyNames())) {
             if (key.startsWith("*import*")) {

@@ -3,12 +3,15 @@ package com.github.t1.config;
 import static lombok.AccessLevel.*;
 
 import java.lang.reflect.Field;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.enterprise.inject.InjectionException;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+
+import org.joda.convert.StringConvert;
 
 import com.github.t1.stereotypes.Annotations;
 
@@ -19,6 +22,56 @@ import com.github.t1.stereotypes.Annotations;
 @Slf4j
 @RequiredArgsConstructor
 abstract class ConfigurationPoint {
+    private static final StringConvert STRING_CONVERT = StringConvert.INSTANCE;
+
+    @RequiredArgsConstructor
+    public abstract class ConfigValue {
+        protected ConfigurationPoint configPoint() {
+            return ConfigurationPoint.this;
+        }
+
+        protected Object convert(String value) {
+            return STRING_CONVERT.convertFromString(configPoint().type(), value);
+        }
+
+        public abstract void addConfigTartet(Object target);
+
+        public abstract void removeConfigTartet(Object target);
+
+        /**
+         * Do <em>not</em> produce the actual value... could be, e.g., a password. <br/>
+         * And take care to not recurse into {@link ConfigurationPoint#toString()}
+         */
+        @Override
+        public String toString() {
+            return "config value for '" + configPoint().name() + "'";
+        }
+    }
+
+    public abstract class UpdatableConfigValue extends ConfigValue {
+        private final List<Object> targets = new ArrayList<>();
+
+        @Override
+        public void addConfigTartet(Object target) {
+            this.targets.add(target);
+            configPoint().set(target, getValue());
+        }
+
+        @Override
+        public void removeConfigTartet(Object target) {
+            targets.remove(target);
+        }
+
+        protected abstract Object getValue();
+
+        public void updateAllConfigTargets() {
+            Object value = getValue();
+            for (Object target : targets) {
+                configPoint().set(target, value);
+            }
+        }
+    }
+
     public static ConfigurationPoint on(Field field) {
         if (config(field) == null)
             return null;
@@ -88,6 +141,6 @@ abstract class ConfigurationPoint {
     @Override
     public String toString() {
         return type().getSimpleName() + " field '" + field.getName() + "' in " + field.getDeclaringClass() //
-                + " to " + configValue;
+                + " named '" + name() + "'" + ((configValue == null) ? "" : (" to " + configValue));
     }
 }

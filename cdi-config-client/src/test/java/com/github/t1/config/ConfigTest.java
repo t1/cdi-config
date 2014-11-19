@@ -9,7 +9,7 @@ import javax.enterprise.context.*;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
-import lombok.*;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
 import org.jboss.arquillian.junit.Arquillian;
@@ -24,9 +24,12 @@ public class ConfigTest extends AbstractTest {
         String value;
     }
 
-    @ToString
     static class ToBeConfigured implements Serializable {
         private static final long serialVersionUID = 1L;
+
+        private static int nextId = 0;
+
+        private final int id = nextId++;
 
         @Config
         String string;
@@ -58,9 +61,17 @@ public class ConfigTest extends AbstractTest {
         @Config(name = "user.home")
         String home;
 
+        @Config(name = "user.name")
+        String userName;
+
         @Produces
         Pojo producePojo() {
             return new Pojo(bool ? "foo" : "bar");
+        }
+
+        @Override
+        public String toString() {
+            return "#" + id;
         }
     }
 
@@ -121,6 +132,11 @@ public class ConfigTest extends AbstractTest {
     @Test
     public void shouldConfigureFromSystemProperty() {
         assertEquals(System.getProperty("user.home"), tbc.home);
+    }
+
+    @Test
+    public void shouldOverwritePropertyValueWithSystemProperty() {
+        assertEquals(System.getProperty("user.name"), tbc.userName);
     }
 
     @Test

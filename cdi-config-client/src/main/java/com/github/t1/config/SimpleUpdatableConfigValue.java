@@ -2,9 +2,11 @@ package com.github.t1.config;
 
 import lombok.Getter;
 
+import com.github.t1.config.ConfigurationPoint.UpdatableConfigValue;
+
 public class SimpleUpdatableConfigValue extends UpdatableConfigValue {
     public SimpleUpdatableConfigValue(ConfigurationPoint configPoint, Object value) {
-        super(configPoint);
+        configPoint.super();
         this.value = value;
     }
 

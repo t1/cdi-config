@@ -23,6 +23,7 @@ public class ConfigCdiExtension implements Extension {
         public void inject(T instance, CreationalContext<T> ctx) {
             log.trace("add config targets in {}", instance);
             for (ConfigurationPoint configurationPoint : configs) {
+                log.trace("add to config point {}", configurationPoint);
                 configurationPoint.addConfigTarget(instance);
             }
             log.trace("done adding config targets in {}", instance);
@@ -36,6 +37,7 @@ public class ConfigCdiExtension implements Extension {
 
             log.trace("remove config targets in {}", instance);
             for (ConfigurationPoint configurationPoint : configs) {
+                log.trace("remove from config point {}", configurationPoint);
                 configurationPoint.removeConfigTarget(instance);
             }
             log.trace("done removing config targets in {}", instance);
@@ -78,9 +80,9 @@ public class ConfigCdiExtension implements Extension {
     }
 
     public void beforeShutdown(@SuppressWarnings("unused") @Observes BeforeShutdown beforeShutdown) {
-        log.debug("shutdown start");
+        log.trace("shutdown start");
         if (configSource != null)
             configSource.shutdown();
-        log.debug("shutdown done");
+        log.trace("shutdown done");
     }
 }

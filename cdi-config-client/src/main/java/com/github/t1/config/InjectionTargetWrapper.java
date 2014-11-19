@@ -8,16 +8,16 @@ import javax.enterprise.inject.spi.*;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public abstract class InjectionTargetWrapper<X> implements InjectionTarget<X> {
-    private final InjectionTarget<X> delegate;
+public abstract class InjectionTargetWrapper<T> implements InjectionTarget<T> {
+    private final InjectionTarget<T> delegate;
 
     @Override
-    public X produce(CreationalContext<X> ctx) {
+    public T produce(CreationalContext<T> ctx) {
         return delegate.produce(ctx);
     }
 
     @Override
-    public void dispose(X instance) {
+    public void dispose(T instance) {
         delegate.dispose(instance);
     }
 
@@ -27,17 +27,17 @@ public abstract class InjectionTargetWrapper<X> implements InjectionTarget<X> {
     }
 
     @Override
-    public void inject(X instance, CreationalContext<X> ctx) {
+    public void inject(T instance, CreationalContext<T> ctx) {
         delegate.inject(instance, ctx);
     }
 
     @Override
-    public void postConstruct(X instance) {
+    public void postConstruct(T instance) {
         delegate.postConstruct(instance);
     }
 
     @Override
-    public void preDestroy(X instance) {
+    public void preDestroy(T instance) {
         delegate.preDestroy(instance);
     }
 }

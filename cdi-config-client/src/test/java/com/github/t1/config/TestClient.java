@@ -18,7 +18,7 @@ public class TestClient {
         log.debug("write initial properties to {}", uri);
         properties.store(Files.newOutputStream(tempFile), null);
 
-        PropertiesConfigSource configSource = new PropertiesConfigSource(uri);
+        PropertiesFileConfigSource configSource = new PropertiesFileConfigSource(uri);
         log.debug("started config source");
 
         Thread.sleep(2_000);

@@ -5,14 +5,9 @@ import java.util.*;
 class MultiConfigSource implements ConfigSource {
     public static ConfigSource of(ConfigSource... sources) {
         List<ConfigSource> sourceList = new ArrayList<>(Arrays.asList(sources));
-        for (ConfigSource source : sources) {
-            if (source instanceof MultiConfigSource) {
-                sourceList.remove(source);
-                ((MultiConfigSource) source).add(sourceList);
-                return source;
-            }
-        }
-        MultiConfigSource multi = new MultiConfigSource();
+        MultiConfigSource multi = (sourceList.get(0) instanceof MultiConfigSource) //
+                ? (MultiConfigSource) sourceList.remove(0) //
+                : new MultiConfigSource();
         multi.add(sourceList);
         return multi;
     }
@@ -33,6 +28,8 @@ class MultiConfigSource implements ConfigSource {
     @Override
     public void configure(ConfigurationPoint configPoint) {
         for (ConfigSource source : sources) {
+            if (configPoint.isConfigured())
+                break;
             source.configure(configPoint);
         }
     }

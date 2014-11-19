@@ -8,11 +8,13 @@ import java.util.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import com.github.t1.config.ConfigurationPoint.UpdatableConfigValue;
+
 @Slf4j
-public class PropertiesConfigSource implements ConfigSource {
+public class PropertiesFileConfigSource implements ConfigSource {
     private class PropertyConfigValue extends UpdatableConfigValue {
         public PropertyConfigValue(ConfigurationPoint configPoint) {
-            super(configPoint);
+            configPoint.super();
         }
 
         @Override
@@ -24,7 +26,7 @@ public class PropertiesConfigSource implements ConfigSource {
 
         @Override
         public String toString() {
-            return "property '" + configPoint().name() + "'" + " from " + uri;
+            return super.toString() + " from properties file " + uri;
         }
     }
 
@@ -56,7 +58,7 @@ public class PropertiesConfigSource implements ConfigSource {
 
     private static FileMonitor FILE_MONITOR = new FileMonitor();
 
-    public PropertiesConfigSource(URI uri) {
+    public PropertiesFileConfigSource(URI uri) {
         this.uri = resolve(uri);
         this.properties = toPropertyMap(load());
 
@@ -64,7 +66,7 @@ public class PropertiesConfigSource implements ConfigSource {
     }
 
     private Map<String, Property> toPropertyMap(Properties in) {
-        Map<String, Property> out = new HashMap<>();
+        Map<String, Property> out = new LinkedHashMap<>();
         for (String name : in.stringPropertyNames()) {
             out.put(name, new Property(in.getProperty(name)));
         }
@@ -171,6 +173,8 @@ public class PropertiesConfigSource implements ConfigSource {
 
     @Override
     public void shutdown() {
-        FILE_MONITOR.remove(Paths.get(uri));
+        if (isFileScheme(uri)) {
+            FILE_MONITOR.remove(Paths.get(uri));
+        }
     }
 }
