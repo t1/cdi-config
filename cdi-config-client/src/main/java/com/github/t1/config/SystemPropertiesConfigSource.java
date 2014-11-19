@@ -33,7 +33,14 @@ public class SystemPropertiesConfigSource implements ConfigSource {
     }
 
     private SystemPropertiesConfigValue configValueFor(ConfigurationPoint configPoint) {
-        return map.computeIfAbsent(configPoint.name(), (c) -> new SystemPropertiesConfigValue(configPoint));
+        SystemPropertiesConfigValue value = map.get(configPoint.name());
+        if (value == null) {
+            value = new SystemPropertiesConfigValue(configPoint);
+            map.put(configPoint.name(), value);
+        }
+        return value;
+        // TODO the shade plugin seems to misunderstand this:
+        // return map.computeIfAbsent(configPoint.name(), (c) -> new SystemPropertiesConfigValue(configPoint));
     }
 
     @Override
