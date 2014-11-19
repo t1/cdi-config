@@ -141,6 +141,7 @@ abstract class ConfigurationPoint {
     @Override
     public String toString() {
         return type().getSimpleName() + " field '" + field.getName() + "' in " + field.getDeclaringClass() //
-                + " named '" + name() + "'" + ((configValue == null) ? "" : (" to " + configValue));
+                + " named '" + name() + "' " //
+                + ((configValue == null) ? "unconfigured" : ("configured to " + configValue));
     }
 }
