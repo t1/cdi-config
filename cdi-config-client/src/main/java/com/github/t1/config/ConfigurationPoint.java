@@ -31,7 +31,11 @@ abstract class ConfigurationPoint {
         }
 
         protected Object convert(String value) {
-            return STRING_CONVERT.convertFromString(configPoint().type(), value);
+            return STRING_CONVERT.convertFromString(configPoint().type(), resolve(value));
+        }
+
+        private String resolve(String value) {
+            return (value == null) ? null : value.replace("$$", "$");
         }
 
         public abstract void addConfigTartet(Object target);

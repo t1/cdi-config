@@ -13,7 +13,8 @@ public class SystemPropertiesConfigSource implements ConfigSource {
         @Override
         protected Object getValue() {
             String key = configPoint().name();
-            return convert(System.getProperty(key));
+            String value = System.getProperty(key);
+            return convert(value);
         }
 
         @Override

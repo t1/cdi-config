@@ -5,7 +5,6 @@ import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import com.github.t1.config.ConfigurationPoint.UpdatableConfigValue;
@@ -47,6 +46,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
                 return false;
             value = newValue;
             for (PropertyConfigValue config : configs) {
+                log.debug("update {}", config.configPoint());
                 config.updateAllConfigTargets();
             }
             return true;
@@ -65,22 +65,24 @@ public class PropertiesFileConfigSource implements ConfigSource {
         initMonitor();
     }
 
-    private Map<String, Property> toPropertyMap(Properties in) {
-        Map<String, Property> out = new LinkedHashMap<>();
-        for (String name : in.stringPropertyNames()) {
-            out.put(name, new Property(in.getProperty(name)));
-        }
-        return out;
-    }
-
     private URI resolve(URI uri) {
-        if (isFileScheme(uri)) {
-            Path path = Paths.get(uri.getSchemeSpecificPart());
-            if (path.startsWith(".")) {
-                return subpath(path, 1).toUri();
-            } else if (path.startsWith("~")) {
-                Path home = Paths.get(System.getProperty("user.home"));
-                return home.resolve(subpath(path, 1)).toUri();
+        if (isFileScheme(uri) && uri.isOpaque()) {
+            try {
+                Path path = Paths.get(uri.getSchemeSpecificPart());
+                if (path.startsWith("~")) {
+                    Path home = Paths.get(System.getProperty("user.home"));
+                    return home.resolve(subpath(path, 1)).toUri();
+                } else {
+                    return path.toUri();
+                }
+            } catch (Throwable e) {
+                /**
+                 * If the current working directory (user.dir) resp. home dir (user.home) doesn't exist, then
+                 * Paths.get(uri) throws: java.lang.NoClassDefFoundError: Could not initialize class
+                 * java.nio.file.FileSystems$DefaultFileSystemHolder
+                 */
+                log.error("can't resolve opaque file uri " + uri);
+                throw e;
             }
         }
         return uri;
@@ -90,7 +92,18 @@ public class PropertiesFileConfigSource implements ConfigSource {
         return "file".equals(uri.getScheme());
     }
 
-    @SneakyThrows(IOException.class)
+    private static Path subpath(Path path, int beginIndex) {
+        return path.subpath(beginIndex, path.getNameCount());
+    }
+
+    private Map<String, Property> toPropertyMap(Properties in) {
+        Map<String, Property> out = new LinkedHashMap<>();
+        for (String name : in.stringPropertyNames()) {
+            out.put(name, new Property(in.getProperty(name)));
+        }
+        return out;
+    }
+
     private Properties load() {
         try (InputStream stream = uri.toURL().openStream()) {
             Properties properties = new Properties();
@@ -105,11 +118,9 @@ public class PropertiesFileConfigSource implements ConfigSource {
             }
             log.debug("loaded {} entries from {}", properties.size(), uri);
             return properties;
+        } catch (IOException e) {
+            throw new RuntimeException("can't open properties uri " + uri, e);
         }
-    }
-
-    private static Path subpath(Path path, int beginIndex) {
-        return path.subpath(beginIndex, path.getNameCount());
     }
 
     private void initMonitor() {
@@ -133,9 +144,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
             if (property == null) {
                 log.error("property '{}' was added to {}... ignoring", key, uri);
             } else {
-                if (property.updateValue(newValue)) {
-                    log.debug("update property '{}' from {}", key, uri);
-                }
+                property.updateValue(newValue);
             }
         }
         for (String missingKey : newProperties.stringPropertyNames()) {

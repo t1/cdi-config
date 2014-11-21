@@ -58,6 +58,9 @@ public class ConfigTest extends AbstractTest {
         @Config(name = "xml-string")
         String xmlString;
 
+        @Config(name = "dollar-string")
+        String dollarString;
+
         @Config(name = "user.home")
         String home;
 
@@ -127,6 +130,11 @@ public class ConfigTest extends AbstractTest {
     @Test
     public void shouldConfigureFromXmlFile() {
         assertEquals("xml-value", tbc.xmlString);
+    }
+
+    @Test
+    public void shouldConfigureEscapedDollarValue() {
+        assertEquals("test$value", tbc.dollarString);
     }
 
     @Test

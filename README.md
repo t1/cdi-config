@@ -2,11 +2,9 @@
 
 [![Dependency Status](https://www.versioneye.com/user/projects/53f72f0ae09da337bc0003bd/badge.svg?style=flat)](https://www.versioneye.com/user/projects/53f72f0ae09da337bc0003bd)
 
-Taking the principles of CDI to configuration of Java EE 7 beans... trivial to start, powerful when required.
+Configure your Java EE (or other CDI-) application with a simple `@Config` annotation.
 
-## one minute tutorial
-
-It's only three steps:
+## One Minute Tutorial
 
 1. Add a dependency on `com.github.t1:cdi-config-client` (i.e. the `cdi-config.jar`) to your `war`.
 1. Add a file `WEB-INF/classes/configuration.properties` with properties like `foo=bar` to your `war`.
@@ -23,13 +21,23 @@ If your field is not a `String`, the value from the properties file has to be co
 
 If you need to define a custom converter, see the [Joda-Convert User Guide](http://www.joda.org/joda-convert/userguide.html).
 
-## Property Names
-
-A good convention is to use dot-delimited names, e.g. `x.y.z`. Keys starting with a `-` are meta properties used to configure cdi-config itself (more to that later). Your values should not contain expression placeholders like `${...}` as we reserve that for future extensions.
-
 ## @Inject and @Config
 
 Configuration happens before Injection does, so you can, e.g., write a producer that requires a configuration.
+
+## Config Sources
+
+The default config source is a file `configuration.properties` in the current class loader, i.e. in the war/jar/whatever. You can specify a different URI to load the config from by setting the system property `cdi-config.config-source`. This URI can 
+
+`java` scheme:
+
+If the
+
+## Reserved For Future Use
+
+Keys starting with a non-letter are meta properties used to configure cdi-config itself (more to that later).
+
+Values should escape dollar signs `$` with a second, i.e. `$$`. We reserve single `$` for a future extensions of expression placeholders like `${...}`.
 
 ## Ideas For Future Versions
 
