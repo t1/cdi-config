@@ -14,20 +14,11 @@ public class ConfigSourceLoader {
         this.uri = rootConfigSourceUri();
     }
 
-    @SneakyThrows(URISyntaxException.class)
     private static URI rootConfigSourceUri() {
-        String systemProperty = System.getProperty("cdi-config.config-source");
-        if (systemProperty == null) {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            if (classLoader == null)
-                classLoader = ClassLoader.getSystemClassLoader();
-            URL resource = classLoader.getResource("configuration.properties");
-            if (resource == null)
-                throw new RuntimeException("no file configuration.properties found");
-            return resource.toURI();
-        } else {
-            return URI.create(systemProperty);
-        }
+        String result = System.getProperty("cdi-config.config-source");
+        if (result == null)
+            result = "classpath:configuration.properties";
+        return URI.create(result);
     }
 
     public ConfigSource load() {
@@ -38,11 +29,15 @@ public class ConfigSourceLoader {
 
     private ConfigSource loadConfigSource(URI uri) {
         log.debug("load config source {}", uri);
-        if ("java".equals(uri.getScheme())) {
-            return insantiate(uri.getSchemeSpecificPart());
-        } else {
-            PropertiesFileConfigSource configSource = new PropertiesFileConfigSource(uri);
-            return resolveImports(configSource);
+        switch (uri.getScheme()) {
+            case "java":
+                return insantiate(uri.getSchemeSpecificPart());
+            case "classpath":
+                uri = resolveClasspath(uri);
+                // fall through:
+            default:
+                PropertiesFileConfigSource configSource = new PropertiesFileConfigSource(uri);
+                return resolveImports(configSource);
         }
     }
 
@@ -50,6 +45,17 @@ public class ConfigSourceLoader {
     private ConfigSource insantiate(String className) {
         Class<?> type = Class.forName(className);
         return (ConfigSource) type.newInstance();
+    }
+
+    @SneakyThrows(URISyntaxException.class)
+    private URI resolveClasspath(URI uri) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null)
+            classLoader = ClassLoader.getSystemClassLoader();
+        URL resource = classLoader.getResource(uri.getSchemeSpecificPart());
+        if (resource == null)
+            throw new RuntimeException("no file configuration.properties found");
+        return resource.toURI();
     }
 
     private ConfigSource resolveImports(PropertiesFileConfigSource properties) {
