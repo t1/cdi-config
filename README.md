@@ -15,35 +15,35 @@ Configure your Java EE (or other CDI-) application with a simple `@Config` annot
         String foo;
 ```
 
+If you want to use a different properties file, specify the system property `cdi-config.config-source` to point to the file's URI, e.g. `file:my-app.properties`. __When you change this file, the configuration will be updated!__
+
 ## Conversion
 
-If your field is not a `String`, the value from the properties file has to be converted. We use [Joda-Convert](http://www.joda.org/joda-convert/) for that, so most conversions work just out of the box, i.e. the property `foo=2014-12-31` is automatically converted for `@Config LocalDate foo`, no matter if the `LocalDate` is from JDK 8+ or from JodaTime ;-)
-
-If you need to define a custom converter, see the [Joda-Convert User Guide](http://www.joda.org/joda-convert/userguide.html).
-
-## @Inject and @Config
-
-Configuration happens before Injection does, so you can, e.g., write a producer that requires a configuration.
+If your field is not a `String`, the value from the properties file has to be converted. Most conversions work just out of the box, i.e. the property `foo=2014-12-31` is automatically converted for `@Config LocalDate foo`, no matter if the `LocalDate` is from JDK 8+ or from JodaTime ;-) If you need to define a custom converter, see the [Joda-Convert User Guide](http://www.joda.org/joda-convert/userguide.html).
 
 ## Config Sources
 
-The default config source is a file `configuration.properties` in the current class loader, i.e. in the war/jar/whatever. You can specify a different URI to load the config from by setting the system property `cdi-config.config-source`. This URI can 
+The source of your configurations is set with the system property `cdi-config.config-source`. This has to be an URI like `http://example.org/my-app.properties`. A `file` URI can be relative to the working directory of your web container, e.g. `file:my-app.properties`, or relative to the home directory of the web container's user, e.g. `file:~/.my-app.properties`.
 
-`java` scheme:
+The default configuration source URI is `classpath:configuration.properties`. The `classpath` scheme can be used to load a file from the current class loader, i.e. in your war/jar/whatever.
 
-If the
+Configs can also be set with system properties. They overwrite all other configurations.
+
+If you want to implement your own config source, you can use the `java` scheme and the fully qualified name of a class implementing the `com.github.t1.config.ConfigSource` interface.
+
+Properties that start with `*import*` will be used as additional URIs to load more configuration.
+
+`file` URIs are watched for changes. As soon as the file changes, all changed configuration points are updated to the new value.
 
 ## Reserved For Future Use
 
-Keys starting with a non-letter are meta properties used to configure cdi-config itself (more to that later).
+Keys starting with a non-letter are reserved, e.g. for meta properties used to configure cdi-config itself (e.g. for `*import*` properties).
 
-Values should escape dollar signs `$` with a second, i.e. `$$`. We reserve single `$` for a future extensions of expression placeholders like `${...}`.
+Values should escape dollar signs `$` with a second, i.e. `$$`. Single `$` are reserved for future extensions, e.g. for expressions like `${other.property}`.
 
 ## Ideas For Future Versions
 
-1. Push config changes (dynamic=true)
 1. Expressions in values
-1. Configurable URI-ConfigProviders
 1. Config-Service
 1. DB-Source
 1. Documentation annotations on configs get pushed into db
