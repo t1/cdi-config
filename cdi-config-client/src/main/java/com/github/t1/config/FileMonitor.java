@@ -1,17 +1,18 @@
 package com.github.t1.config;
 
+import static java.util.concurrent.TimeUnit.*;
+
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
+import java.util.concurrent.Executors;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FileMonitor {
-    private static int fileMonitorThreadCount;
-
     private static class FileWatcher {
         private final Path path;
         private FileTime lastModified;
@@ -42,7 +43,7 @@ public class FileMonitor {
     }
 
     private final List<FileWatcher> watchers = new ArrayList<>();
-    private Thread thread;
+    private boolean started;
 
     @Setter
     private long interval = initInterval();
@@ -52,34 +53,22 @@ public class FileMonitor {
         return (property == null) ? 1_000 : Integer.parseInt(property);
     }
 
-    private void start() {
-        if (thread == null) {
-            this.thread = new Thread("file monitor " + fileMonitorThreadCount++) {
-                private int count;
+    synchronized private void start() {
+        if (started)
+            return;
+        started = true;
+        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(new Runnable() {
+            private int count;
 
-                @Override
-                public void run() {
-                    log.debug("start watcher thread with interval {}", interval);
-                    run: while (!watchers.isEmpty()) {
-                        try {
-                            Thread.sleep(interval);
-                            log.trace("run {}", count++);
+            @Override
+            public void run() {
+                log.trace("run {}", count++);
 
-                            for (FileWatcher watcher : watchers) {
-                                watcher.run();
-                            }
-                        } catch (InterruptedException e) {
-                            log.debug("watcher thread interrupted");
-                            break run;
-                        }
-                    }
-                    log.debug("stop watcher thread");
+                for (FileWatcher watcher : watchers) {
+                    watcher.run();
                 }
-            };
-            thread.setDaemon(true);
-            thread.setPriority(Thread.MIN_PRIORITY);
-            thread.start();
-        }
+            }
+        }, 0, interval, MILLISECONDS);
     }
 
     public void add(Path path, Runnable runnable) {
@@ -95,16 +84,6 @@ public class FileMonitor {
             log.warn("tried to remove unknown watcher for {}", path);
         } else {
             this.watchers.remove(watcher);
-            if (watchers.isEmpty()) {
-                log.info("wait for watcher thread to stop");
-                try {
-                    thread.interrupt();
-                    thread.join();
-                    thread = null;
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
         }
     }
 
