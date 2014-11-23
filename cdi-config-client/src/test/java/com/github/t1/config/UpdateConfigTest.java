@@ -8,11 +8,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.*;
 import org.junit.runner.RunWith;
 
+@Slf4j
 @RunWith(Arquillian.class)
 public class UpdateConfigTest extends AbstractTest {
     public static class UpdatingConfigSource implements ConfigSource {
@@ -39,6 +41,8 @@ public class UpdateConfigTest extends AbstractTest {
     static class ToBeConfigured {
         @Config(name = "java-config-string")
         private AtomicReference<String> javaConfigString;
+        @Config(name = "user.language")
+        private AtomicReference<String> systemPropertyString;
         @Config(name = "alt-string")
         private AtomicReference<String> altString;
     }
@@ -48,6 +52,18 @@ public class UpdateConfigTest extends AbstractTest {
 
     @Rule
     public TestLoggerRule logger = new TestLoggerRule();
+
+    private void waitForValue(String expectedValue, AtomicReference<String> ref) throws InterruptedException {
+        for (int i = 0; i < 40; i++) {
+            log.debug("wait {}", i);
+            Thread.sleep(50);
+
+            if (expectedValue.equals(ref.get())) {
+                return;
+            }
+        }
+        fail("expected value to change to " + expectedValue + ", but it's still " + ref.get());
+    }
 
     @Test
     public void shouldUpdateFromJavaClass() {
@@ -60,6 +76,19 @@ public class UpdateConfigTest extends AbstractTest {
     }
 
     @Test
+    public void shouldUpdateFromSystemProperty() throws Exception {
+        String orig = System.getProperty("user.language");
+        try {
+            assertEquals(orig, tbc.systemPropertyString.get());
+            System.setProperty("user.language", "foo");
+
+            waitForValue("foo", tbc.systemPropertyString);
+        } finally {
+            System.setProperty("user.language", orig);
+        }
+    }
+
+    @Test
     public void shouldUpdateFromFileChange() throws Exception {
         assertEquals("alt-value", tbc.altString.get());
         assertEquals(CONFIG1, readFile(PATH));
@@ -67,15 +96,7 @@ public class UpdateConfigTest extends AbstractTest {
         try {
             Files.write(PATH, CONFIG2.getBytes());
 
-            for (int i = 0; i < 40; i++) {
-                System.out.println("wait " + i);
-                Thread.sleep(50);
-
-                if ("alt-value2".equals(tbc.altString.get())) {
-                    return;
-                }
-            }
-            fail("expected altString to change to alt-value2, but it's still " + tbc.altString.get());
+            waitForValue("alt-value2", tbc.altString);
         } finally {
             Files.write(PATH, CONFIG1.getBytes());
         }

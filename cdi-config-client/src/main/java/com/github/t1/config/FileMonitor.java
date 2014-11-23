@@ -6,13 +6,15 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FileMonitor {
+    private static int nextInstance = 0;
+
     private static class FileWatcher {
         private final Path path;
         private FileTime lastModified;
@@ -42,8 +44,9 @@ public class FileMonitor {
         }
     }
 
+    private final int instance = nextInstance++;
     private final List<FileWatcher> watchers = new ArrayList<>();
-    private boolean started;
+    private ScheduledExecutorService executor;
 
     @Setter
     private long interval = initInterval();
@@ -54,15 +57,16 @@ public class FileMonitor {
     }
 
     synchronized private void start() {
-        if (started)
+        if (executor != null)
             return;
-        started = true;
-        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(new Runnable() {
+        executor = Executors.newSingleThreadScheduledExecutor();
+        log.debug("start executor service {}", instance);
+        executor.scheduleWithFixedDelay(new Runnable() {
             private int count;
 
             @Override
             public void run() {
-                log.trace("run {}", count++);
+                log.trace("run {}-{}", instance, count++);
 
                 for (FileWatcher watcher : watchers) {
                     watcher.run();
@@ -84,7 +88,19 @@ public class FileMonitor {
             log.warn("tried to remove unknown watcher for {}", path);
         } else {
             this.watchers.remove(watcher);
+            if (executor != null && watchers.isEmpty()) {
+                stop();
+            }
         }
+    }
+
+    @SneakyThrows(InterruptedException.class)
+    private void stop() {
+        log.debug("shutting down executor service {}", instance);
+        executor.shutdown();
+        executor.awaitTermination(10, SECONDS);
+        executor = null;
+        log.debug("executor service {} is terminated", instance);
     }
 
     private FileWatcher findFor(Path path) {
