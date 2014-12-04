@@ -27,7 +27,7 @@ The source of your configurations is set with the system property `cdi-config.co
 
 The default configuration source URI is `classpath:configuration.properties`. The `classpath` scheme can be used to load a file from the current class loader, i.e. in your war/jar/whatever.
 
-Configs can also be set with system properties. They overwrite all other configurations. If a system property is changed, the configuration points will be updated (but you can't start or stop overwriting).
+Configs can also be set with system properties. They overwrite all other configurations. If a system property is changed, the configuration points will be updated (but you can't start or stop overwriting). The same is true for environment variables, which is useful e.g. for Jenkins jobs. System properties overwrite environment variables.
 
 If you want to implement your own config source, you can use the `java` scheme and the fully qualified name of a class implementing the `com.github.t1.config.ConfigSource` interface.
 
@@ -43,6 +43,7 @@ Values should escape dollar signs `$` with a second, i.e. `$$`. Single `$` are r
 
 ## Ideas For Future Versions
 
+1. Default values (maybe just by assignment)
 1. Documentation annotations on configs
 1. Automatic qualifiers: App, Version, Host, Locale. Resolve to matrix params / file names.
 1. Config-Service to proxy config source

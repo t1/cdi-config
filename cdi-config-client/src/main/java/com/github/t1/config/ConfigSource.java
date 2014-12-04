@@ -1,8 +1,16 @@
 package com.github.t1.config;
 
-
+/**
+ * TODO document
+ */
 public interface ConfigSource {
+    /**
+     * TODO document
+     */
     public void configure(ConfigurationPoint configPoint);
 
-    public void shutdown();
+    /**
+     * TODO document
+     */
+    public default void shutdown() {}
 }

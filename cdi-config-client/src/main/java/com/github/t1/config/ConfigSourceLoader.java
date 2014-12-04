@@ -24,6 +24,7 @@ public class ConfigSourceLoader {
     public ConfigSource load() {
         return MultiConfigSource.of( //
                 new SystemPropertiesConfigSource(), //
+                new EnvironmentVariablesConfigSource(), //
                 loadConfigSource(uri));
     }
 

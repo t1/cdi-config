@@ -64,6 +64,9 @@ public class ConfigTest extends AbstractTest {
         @Config(name = "user.home")
         String home;
 
+        @Config(name = "PATH")
+        String path;
+
         @Config(name = "user.name")
         String userName;
 
@@ -140,6 +143,11 @@ public class ConfigTest extends AbstractTest {
     @Test
     public void shouldConfigureFromSystemProperty() {
         assertEquals(System.getProperty("user.home"), tbc.home);
+    }
+
+    @Test
+    public void shouldConfigureFromEnvironmentVariable() {
+        assertEquals(System.getenv("PATH"), tbc.path);
     }
 
     @Test

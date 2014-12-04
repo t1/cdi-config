@@ -52,7 +52,11 @@ abstract class ConfigurationPoint {
         }
     }
 
-    public abstract class UpdatableConfigValue extends ConfigValue {
+    public abstract class GettableConfigValue extends ConfigValue {
+        protected abstract Object getValue();
+    }
+
+    public abstract class UpdatableConfigValue extends GettableConfigValue {
         private final List<Object> targets = new ArrayList<>();
 
         @Override
@@ -65,8 +69,6 @@ abstract class ConfigurationPoint {
         public void removeConfigTartet(Object target) {
             targets.remove(target);
         }
-
-        protected abstract Object getValue();
 
         public void updateAllConfigTargets() {
             Object value = getValue();
