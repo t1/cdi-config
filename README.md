@@ -23,17 +23,21 @@ If your field is not a `String`, the value from the properties file has to be co
 
 ## Config Sources
 
-The source of your configurations is set with the system property `cdi-config.config-source`. This has to be an URI like `http://example.org/my-app.properties`. A `file` URI can be relative to the working directory of your web container, e.g. `file:my-app.properties`, or relative to the home directory of the web container's user, e.g. `file:~/.my-app.properties`.
+The source of your configurations is set with the system property `cdi-config.config-source`. This has to be an URI like `http://example.org/my-app.properties`. A `file` URI can be relative to the working directory of your web container, e.g. `file:my-app.properties`, or relative to the home directory of the web container's user, e.g. `file:~/.my-app.properties`. `file` URIs are watched for changes, i.e. if the file changes, all configuration points are updated to the new value (but see Thread Safety below).
 
 The default configuration source URI is `classpath:configuration.properties`. The `classpath` scheme can be used to load a file from the current class loader, i.e. in your war/jar/whatever.
 
-Configs can also be set with system properties. They overwrite all other configurations. If a system property is changed, the configuration points will be updated (but you can't start or stop overwriting). The same is true for environment variables, which is useful e.g. for Jenkins jobs. System properties overwrite environment variables.
+Configs can also be set with system properties. They overwrite all other configurations. If a system property is changed, the configuration points will be updated (but you can't start or stop overwriting). Also environment variables can be used to configure, which is useful e.g. for Jenkins jobs. System properties overwrite environment variables.
 
-If you want to implement your own config source, you can use the `java` scheme and the fully qualified name of a class implementing the `com.github.t1.config.ConfigSource` interface.
+If you want to implement your own config source, you can use the `java` scheme and the fully qualified name of a class implementing the `com.github.t1.config.ConfigSource` interface, e.g. `java:com.example.MyConfigSource`.
 
 Properties that start with `*import*` will be used as additional URIs to load more configuration.
 
-`file` URIs are watched for changes. As soon as the file changes, all changed configuration points are updated to the new value.
+## Thread Safety
+
+Setting values in a multi threaded environment can be dangerous, and really strange things can happen. Not only that a value changes between two accesses, other, really nasty things like partial updates can happen, e.g., on some processor architectures it may happen that one half of a long is updated while the other half still is the old value.
+
+To prevent these issues, config fields that are accessed by multiple threads should be marked as `volatile` or packaged into an `AtomicReference`, if their config source is updated.
 
 ## Reserved For Future Use
 
