@@ -4,10 +4,10 @@
     <parent>
         <groupId>com.github.t1</groupId>
         <artifactId>cdi-config-parent</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cdi-config-client</artifactId>
+    <artifactId>cdi-config</artifactId>
 
     <build>
         <finalName>cdi-config</finalName>
@@ -46,17 +46,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>javax.enterprise</groupId>
-            <artifactId>cdi-api</artifactId>
-            <version>1.2</version>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>7.0</version>
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.t1</groupId>
-            <artifactId>cdi-config-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.joda</groupId>
             <artifactId>joda-convert</artifactId>
@@ -73,12 +68,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.1.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>7.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

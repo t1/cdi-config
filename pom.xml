@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.t1</groupId>
     <artifactId>cdi-config-parent</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>cdi-config</module>
-        <module>tck</module>
+        <module>cdi-config-tck</module>
     </modules>
 
     <name>CDI-Config</name>
