@@ -7,14 +7,17 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>cdi-config-common</module>
-        <module>cdi-config-client</module>
-        <module>cdi-config-service</module>
-        <module>cdi-config-tck</module>
+        <module>cdi-config</module>
+        <module>tck</module>
     </modules>
 
     <name>CDI-Config</name>
     <description>A CDI producer for configurations</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
 
     <scm>
         <developerConnection>scm:git:https://github.com/t1/cdi-config</developerConnection>

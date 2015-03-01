@@ -8,7 +8,7 @@ import javax.ws.rs.core.Response;
 @Path("/configured")
 public class ConfiguredResource {
     @Config(name = "config-key")
-    volatile String value;
+    String value;
 
     @GET
     public Response getConfig() {
