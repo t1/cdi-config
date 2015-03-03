@@ -25,7 +25,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
 
         @Override
         public String toString() {
-            return super.toString() + " from properties file " + uri;
+            return super.toString() + " from " + uri;
         }
     }
 

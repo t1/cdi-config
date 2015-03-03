@@ -1,7 +1,9 @@
 package com.github.t1.config;
 
-import java.lang.reflect.Field;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
@@ -52,6 +54,45 @@ public class ConfigCdiExtension implements Extension {
         return configSource;
     }
 
+    public <T> void processAnnotatedType(@Observes @WithAnnotations(Config.class) ProcessAnnotatedType<T> pat) {
+        if (!hasUnsafeConfig(pat.getAnnotatedType().getJavaClass())) {
+            log.debug("all safe in {}", pat.getAnnotatedType().getBaseType());
+            return;
+        }
+        addAnnotation(DelayedConfigChange.class, pat);
+    }
+
+    private <T> void addAnnotation(Class<? extends Annotation> annotationType, ProcessAnnotatedType<T> pat) {
+        log.debug("add {} annotation to {}", annotationType.getSimpleName(), pat.getAnnotatedType().getBaseType());
+        Set<Annotation> annotations = new HashSet<>();
+        annotations.addAll(pat.getAnnotatedType().getAnnotations());
+        annotations.add(new Annotation() {
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return annotationType;
+            }
+        });
+        pat.setAnnotatedType(new AnnotatedTypeWrapper<T>(pat.getAnnotatedType()) {
+            @Override
+            public Set<Annotation> getAnnotations() {
+                return annotations;
+            }
+        });
+    }
+
+    private boolean hasUnsafeConfig(Class<?> type) {
+        for (Field field : type.getDeclaredFields()) {
+            if (!isSafe(field)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isSafe(Field field) {
+        return Modifier.isVolatile(field.getModifiers()) || AtomicReference.class.equals(field.getType());
+    }
+
     public <T> void processInjectionTarget(@Observes ProcessInjectionTarget<T> pit) {
         Class<T> type = pit.getAnnotatedType().getJavaClass();
         log.trace("scan {} for configuration points", type);
@@ -75,6 +116,7 @@ public class ConfigCdiExtension implements Extension {
 
         if (!configs.isEmpty()) {
             InjectionTarget<T> it = pit.getInjectionTarget();
+            log.debug("found {} config points in {}", configs.size(), pit.getAnnotatedType());
             pit.setInjectionTarget(new ConfiguringInjectionTarget<>(it, configs));
         }
     }

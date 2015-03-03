@@ -1,8 +1,6 @@
 package com.github.t1.config;
 
-import static com.github.t1.config.Config.*;
-
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,9 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 class StandardConfigurationPoint extends ConfigurationPoint {
     public StandardConfigurationPoint(Field field) {
         super(field);
-        if (!Modifier.isVolatile(field.getModifiers())) {
-            log.warn("the field {} is not volatile. see " + WIKI.resolve("Field-Not-Volatile"), field);
-        }
     }
 
     @Override
@@ -22,6 +17,12 @@ class StandardConfigurationPoint extends ConfigurationPoint {
 
     @Override
     public void set(Object target, Object value) {
-        setField(target, value);
+        ConfigChangeDelayInterceptor.run(target, new Runnable() {
+            @Override
+            public void run() {
+                log.debug("configure {}", StandardConfigurationPoint.this);
+                setField(target, value);
+            }
+        });
     }
 }

@@ -8,15 +8,16 @@ Configure your Java EE (or other CDI-) application with a simple `@Config` annot
 
 1. Add a dependency on `com.github.t1:cdi-config-client` (i.e. the `cdi-config.jar`) to your `war`.
 1. Add a file `WEB-INF/classes/configuration.properties` with property `*import*=file:~/my-app.properties` to your `war`.
-1. Add a file `my-app.properties` with a property `foo=bar` to the home directory.
+1. Add a file `my-app.properties` with a property `foo=bar` to the home directory of your container's user.
 1. Add a `@Config` annotation to one of your fields, e.g.:
 
 ```java
         @Config
         String foo;
 ```
-
-After deploying your war, the field `foo` will be set to the value `bar`. If you change the config file, the value is updated at runtime.
+1. After deploying your war, the field `foo` will be set to the value `bar`.
+1. Finally change `bar` to `baz` in the config file.
+1. See the value updated at runtime.
 
 ## Conversion
 
@@ -36,9 +37,15 @@ Properties that start with `*import*` will be used as additional URIs to load mo
 
 ## Thread Safety
 
-Setting values in a multi threaded environment can be dangerous, and really strange things can happen. Not only that a value changes between two accesses, other, really nasty things like partial updates can happen, e.g., on some processor architectures it may happen that one half of a long is updated while the other half still is the old value.
+There's not guarantee as to when a change from a configuration source will be applied to a configuration point; or in what order.
 
-To prevent these issues, config fields that are accessed by multiple threads should be marked as `volatile` or packaged into an `AtomicReference`, if their config source is updated.
+If you can live with that, you're fine. If not, here's some background:
+
+Configuration changes can't reasonably be made atomic. So, even if you change multiple values in a config source at the same time, they will be applied one by one and it can happen that one value has already changed while another has not, yet. This happens also for single values used in different beans; and even several instances of the same bean are updated one by one.
+
+Additionally, updating config values happens in a separate thread. `cdi-config` prevents multi-threading issues on beans containing at least one thread-unsafe configuration point by delaying config updates until all invocations on a bean instance have returned. A configuration point can be made thread-safe by using the `volatile` keyword or putting it into an `AtomicReference`.
+
+Generally this is only relevant for beans that are under constant load, when it may take a long time until your config change is applied. If you do not what this delaying, you can make all configuration points thread-safe instead.
 
 ## Reserved For Future Use
 
@@ -48,14 +55,18 @@ Values should escape dollar signs `$` with a second, i.e. `$$`. Single `$` are r
 
 ## Ideas For Future Versions
 
-1. Default values (maybe just by assignment)
 1. Documentation annotations on configs
-1. Automatic qualifiers: App, Version, Host, Locale. Resolve to matrix params / file names.
-1. Config-Service to proxy config source
-1. SSE for updates over http
+1. Web-Interface to see and change configs
+1. Convert complex config objects from JSON or xml
+1. REST-Service to proxy config source
+1. SSE/Websockets for updates over http
+1. Cluster support
 1. DB-Source
 1. Expressions in values
 1. Dynamically overwrite with system properties
 1. Manual qualifiers
 1. Dynamic qualifiers from e.g. session (e.g. Market, http-Language, etc.)
+1. Automatic qualifiers: App, Version, Host, Locale. Resolve to matrix params / file names.
+1. @Config on methods and constructors
+1. Default values (maybe just by assignment)
 1. Comprehensive, consecutive examples

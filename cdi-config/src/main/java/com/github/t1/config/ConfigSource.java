@@ -1,16 +1,10 @@
 package com.github.t1.config;
 
-/**
- * TODO document
- */
+/** The source of configurations, i.e. files, system properties, etc. */
 public interface ConfigSource {
-    /**
-     * TODO document
-     */
+    /** Apply the configuration for that {@link ConfigurationPoint}. */
     public void configure(ConfigurationPoint configPoint);
 
-    /**
-     * TODO document
-     */
+    /** Do cleanup necessary for this {@link ConfigSource}, e.g. stop watching for file changes. */
     public default void shutdown() {}
 }

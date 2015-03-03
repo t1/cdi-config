@@ -16,12 +16,12 @@ import org.joda.convert.StringConvert;
 import com.github.t1.stereotypes.Annotations;
 
 /**
- * The point where a configuration should go into, i.e. the field annotated as {@link Config} on the class level, not
- * the instance.
+ * The point where a configuration should go into, i.e. the field annotated as {@link Config}. This is on the class
+ * level, not the instance.
  */
 @Slf4j
 @RequiredArgsConstructor
-abstract class ConfigurationPoint {
+public abstract class ConfigurationPoint {
     private static final StringConvert STRING_CONVERT = StringConvert.INSTANCE;
 
     @RequiredArgsConstructor
