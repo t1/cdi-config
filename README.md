@@ -55,7 +55,6 @@ Values should escape dollar signs `$` with a second, i.e. `$$`. Single `$` are r
 
 ## Ideas For Future Versions
 
-1. Documentation annotations on configs
 1. Web-Interface to see and change configs
 1. Convert complex config objects from JSON or xml
 1. REST-Service to proxy config source

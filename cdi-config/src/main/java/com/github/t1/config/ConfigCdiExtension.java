@@ -104,8 +104,11 @@ public class ConfigCdiExtension implements Extension {
                 if (configPoint != null) {
                     configSource().configure(configPoint);
                     if (!configPoint.isConfigured()) {
-                        log.error("can't configure {}", configPoint);
-                        throw new DefinitionException("no config value found for " + configPoint);
+                        String message = "no config value found for " + configPoint;
+                        if (!configPoint.config().description().isEmpty())
+                            message += "\n  [" + configPoint.config().description() + "]";
+                        log.error(message);
+                        throw new DefinitionException(message);
                     }
                     configs.add(configPoint);
                 }

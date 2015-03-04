@@ -19,7 +19,7 @@ public class ConfiguredResource implements Serializable {
     private static int nextId = 0;
     private final int id = nextId++;
 
-    @Config(name = "config-key")
+    @Config(name = "config-key", description = "the value to be configured")
     volatile String value;
 
     @GET
