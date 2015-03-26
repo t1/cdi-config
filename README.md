@@ -56,16 +56,20 @@ Values should escape dollar signs `$` with a second, i.e. `$$`. Single `$` are r
 ## Ideas For Future Versions
 
 1. Web-Interface to see and change configs
+1. JMX config source
+1. JNDI config source
+1. DB config source
+1. @Config on methods 
+1. @Config on constructors (maybe requires @Inject)
 1. Convert complex config objects from JSON or xml
 1. REST-Service to proxy config source
 1. SSE/Websockets for updates over http
 1. Cluster support
-1. DB-Source
 1. Expressions in values
-1. Dynamically overwrite with system properties
+1. Dynamically overwrite (e.g. with system property)
 1. Manual qualifiers
 1. Dynamic qualifiers from e.g. session (e.g. Market, http-Language, etc.)
-1. Automatic qualifiers: App, Version, Host, Locale. Resolve to matrix params / file names.
-1. @Config on methods and constructors
+1. Automatic qualifiers: App, Version, Host, Locale.
+1. Resolve to matrix params / file names.
 1. Default values (maybe just by assignment)
 1. Comprehensive, consecutive examples
