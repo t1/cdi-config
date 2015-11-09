@@ -9,12 +9,12 @@ import javax.enterprise.context.*;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
-import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.*;
 import org.junit.runner.RunWith;
+
+import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RunWith(Arquillian.class)
@@ -58,8 +58,8 @@ public class ConfigTest extends AbstractTest {
         @Config(name = "xml-string")
         String xmlString;
 
-        @Config(name = "dollar-string")
-        String dollarString;
+        @Config
+        String resolvedString;
 
         @Config(name = "user.home")
         String home;
@@ -136,8 +136,8 @@ public class ConfigTest extends AbstractTest {
     }
 
     @Test
-    public void shouldConfigureEscapedDollarValue() {
-        assertEquals("test$value", tbc.dollarString);
+    public void shouldResolveValueWithExpession() {
+        assertEquals("--" + System.getProperty("user.home") + "--", tbc.resolvedString);
     }
 
     @Test

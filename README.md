@@ -33,7 +33,9 @@ Configs can also be set with system properties. They overwrite all other configu
 
 If you want to implement your own config source, you can use the `java` scheme and the fully qualified name of a class implementing the `com.github.t1.config.ConfigSource` interface, e.g. `java:com.example.MyConfigSource`.
 
-Properties that start with `*import*` will be used as additional URIs to load more configuration.
+Properties that start with `*import*` will be used as additional URIs to load more configuration. Note that property files allow only unique keys, so you can use suffixes for import keys; descriptive names have proven to be very helpful, e.g., `*import*config-dir`, `*import*central-uri`.
+
+Values containing curly brackets `{` or `}` are resolved as configuration expressions like `{other.property}`. Currently only system properties can be resolved in this way.
 
 ## Thread Safety
 
@@ -51,10 +53,13 @@ Generally this is only relevant for beans that are under constant load, when it 
 
 Keys starting with a non-letter are reserved, e.g. for meta properties used to configure cdi-config itself (e.g. for `*import*` properties).
 
-Values should escape dollar signs `$` with a second, i.e. `$$`. Single `$` are reserved for future extensions, e.g. for expressions like `${other.property}`.
-
 ## Ideas For Future Versions
 
+1. Write `Config#description` as comment to properties file
+1. JSON config files
+1. YAML config files
+1. XML config files
+1. Authorize for http config sources (so we can read confidential configs)
 1. Web-Interface to see and change configs
 1. JMX config source
 1. JNDI config source
@@ -65,11 +70,12 @@ Values should escape dollar signs `$` with a second, i.e. `$$`. Single `$` are r
 1. REST-Service to proxy config source
 1. SSE/Websockets for updates over http
 1. Cluster support
-1. Expressions in values
+1. Non-system property expressions in values
 1. Dynamically overwrite (e.g. with system property)
 1. Manual qualifiers
 1. Dynamic qualifiers from e.g. session (e.g. Market, http-Language, etc.)
 1. Automatic qualifiers: App, Version, Host, Locale.
 1. Resolve to matrix params / file names.
 1. Default values (maybe just by assignment)
+1. Default values in value expressions (e.g. `{foo:bar}` resolves to the value of `foo` if configured, or `bar` if not)
 1. Comprehensive, consecutive examples

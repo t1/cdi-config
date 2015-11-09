@@ -5,15 +5,16 @@ import static lombok.AccessLevel.*;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.*;
 
 import javax.enterprise.inject.InjectionException;
-
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import org.joda.convert.StringConvert;
 
 import com.github.t1.stereotypes.Annotations;
+
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The point where a configuration should go into, i.e. the field annotated as {@link Config}. This is on the class
@@ -22,7 +23,30 @@ import com.github.t1.stereotypes.Annotations;
 @Slf4j
 @RequiredArgsConstructor
 public abstract class ConfigurationPoint {
+    private static final Pattern EXPRESSION = Pattern.compile("\\{(?<key>[^}]*)\\}");
     private static final StringConvert STRING_CONVERT = StringConvert.INSTANCE;
+
+    static String resolveExpressions(String value) {
+        Matcher matcher = EXPRESSION.matcher(value);
+        StringBuffer sb = new StringBuffer();
+        boolean foundExpressions = false;
+        while (matcher.find()) {
+            foundExpressions = true;
+            String key = matcher.group("key");
+            String resolved = System.getProperty(key);
+            if (resolved == null) {
+                log.error("no system property for key '" + key + "'");
+                resolved = "{" + key + "}";
+            }
+            matcher.appendReplacement(sb, resolved);
+        }
+        if (!foundExpressions)
+            return value;
+        matcher.appendTail(sb);
+        String result = sb.toString();
+        log.debug("resolved '{}' to '{}'", value, result);
+        return result;
+    }
 
     @RequiredArgsConstructor
     public abstract class ConfigValue {
@@ -35,7 +59,9 @@ public abstract class ConfigurationPoint {
         }
 
         private String resolve(String value) {
-            return (value == null) ? null : value.replace("$$", "$");
+            if (value == null)
+                return null;
+            return resolveExpressions(value);
         }
 
         public abstract void addConfigTartet(Object target);
@@ -85,7 +111,7 @@ public abstract class ConfigurationPoint {
         return (field.getType().isAssignableFrom(AtomicReference.class)) //
                 ? new AtomicReferenceConfigurationPoint(field) //
                 : new StandardConfigurationPoint(field) //
-        ;
+                ;
     }
 
     private static Config config(Field field) {

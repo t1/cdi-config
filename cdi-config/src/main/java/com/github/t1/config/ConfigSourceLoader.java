@@ -1,5 +1,7 @@
 package com.github.t1.config;
 
+import static com.github.t1.config.ConfigurationPoint.*;
+
 import java.net.*;
 import java.util.ArrayList;
 
@@ -65,6 +67,7 @@ public class ConfigSourceLoader {
             if (key.startsWith("*import*")) {
                 String value = properties.removeProperty(key);
                 log.debug("resolve import {}: {}", key, value);
+                value = resolveExpressions(value);
                 URI importUri = URI.create(value);
                 ConfigSource resolvedSource = loadConfigSource(importUri);
                 result = MultiConfigSource.of(result, resolvedSource);
