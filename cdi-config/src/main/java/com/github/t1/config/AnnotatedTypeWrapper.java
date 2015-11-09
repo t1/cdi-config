@@ -23,7 +23,6 @@ public class AnnotatedTypeWrapper<T> implements AnnotatedType<T> {
     }
 
     @Override
-    @SuppressWarnings("null")
     public <U extends Annotation> U getAnnotation(Class<U> annotationType) {
         for (Annotation annotation : getAnnotations()) {
             if (annotation.annotationType().equals(annotationType)) {
