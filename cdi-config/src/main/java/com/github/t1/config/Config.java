@@ -15,8 +15,11 @@ public @interface Config {
     public static final URI WIKI = URI.create("https://github.com/t1/cdi-config/wiki/");
 
     public static final String USE_FIELD_NAME = "###_USE_FIELD_NAME_###";
+    public static final String NO_DEFAULT_VALUE = "###_NO_DEFAULT_VALUE_###";
 
     public String name() default USE_FIELD_NAME;
 
     public String description() default "";
+
+    public String defaultValue() default NO_DEFAULT_VALUE;
 }

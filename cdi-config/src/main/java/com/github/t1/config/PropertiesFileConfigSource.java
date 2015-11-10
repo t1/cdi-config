@@ -5,9 +5,9 @@ import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
 
-import lombok.extern.slf4j.Slf4j;
-
 import com.github.t1.config.ConfigurationPoint.UpdatableConfigValue;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PropertiesFileConfigSource implements ConfigSource {
@@ -119,7 +119,8 @@ public class PropertiesFileConfigSource implements ConfigSource {
             log.debug("loaded {} entries from {}", properties.size(), uri);
             return properties;
         } catch (IOException e) {
-            throw new RuntimeException("can't open properties uri " + uri, e);
+            log.warn("can't open properties uri " + uri + ": " + e + ". Fall back to empty properties.");
+            return new Properties();
         }
     }
 

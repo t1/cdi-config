@@ -17,12 +17,9 @@ class StandardConfigurationPoint extends ConfigurationPoint {
 
     @Override
     public void set(Object target, Object value) {
-        ConfigChangeDelayInterceptor.run(target, new Runnable() {
-            @Override
-            public void run() {
-                log.debug("configure {}", StandardConfigurationPoint.this);
-                setField(target, value);
-            }
+        ConfigChangeDelayInterceptor.run(target, () -> {
+            log.debug("configure {}", StandardConfigurationPoint.this);
+            setField(target, value);
         });
     }
 }

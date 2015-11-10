@@ -7,12 +7,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.*;
 import org.junit.runner.RunWith;
+
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RunWith(Arquillian.class)
@@ -26,9 +26,6 @@ public class UpdateConfigTest extends AbstractTest {
                 configPoint.setConfigValue(configValue);
             }
         }
-
-        @Override
-        public void shutdown() {}
     }
 
     private static final Path PATH = Paths.get("target/test-classes/configuration-alt.properties");

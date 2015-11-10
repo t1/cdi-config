@@ -55,6 +55,8 @@ public abstract class ConfigurationPoint {
         }
 
         protected Object convert(String value) {
+            if (value == null)
+                value = configPoint().defaultValue();
             return STRING_CONVERT.convertFromString(configPoint().type(), resolve(value));
         }
 
@@ -123,13 +125,22 @@ public abstract class ConfigurationPoint {
 
     private ConfigValue configValue;
 
-    public Config config() {
+    private Config config() {
         return config(field);
     }
 
     public String name() {
         String name = config().name();
         return Config.USE_FIELD_NAME.equals(name) ? field.getName() : name;
+    }
+
+    public String description() {
+        return config().description();
+    }
+
+    public String defaultValue() {
+        String defaultValue = config().defaultValue();
+        return (Config.NO_DEFAULT_VALUE.equals(defaultValue)) ? null : defaultValue;
     }
 
     protected abstract Class<?> type();

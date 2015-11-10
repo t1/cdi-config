@@ -105,8 +105,8 @@ public class ConfigCdiExtension implements Extension {
                     configSource().configure(configPoint);
                     if (!configPoint.isConfigured()) {
                         String message = "no config value found for " + configPoint;
-                        if (!configPoint.config().description().isEmpty())
-                            message += "\n  [" + configPoint.config().description() + "]";
+                        if (!configPoint.description().isEmpty())
+                            message += "\n  [" + configPoint.description() + "]";
                         log.error(message);
                         throw new DefinitionException(message);
                     }

@@ -38,7 +38,4 @@ public class EnvironmentVariablesConfigSource extends MapConfigSource<Environmen
     protected EnvironmentVariableConfigValue createConfigValueFor(ConfigurationPoint configPoint) {
         return new EnvironmentVariableConfigValue(configPoint);
     }
-
-    @Override
-    public void shutdown() {}
 }

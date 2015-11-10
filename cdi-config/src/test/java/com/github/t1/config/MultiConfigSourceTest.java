@@ -1,9 +1,10 @@
 package com.github.t1.config;
 
 import static org.junit.Assert.*;
-import lombok.Value;
 
 import org.junit.Test;
+
+import lombok.Value;
 
 public class MultiConfigSourceTest {
     @Value
@@ -17,9 +18,6 @@ public class MultiConfigSourceTest {
 
         @Override
         public void configure(ConfigurationPoint configPoint) {}
-
-        @Override
-        public void shutdown() {}
     }
 
     private static final ConfigSource A = new DummyConfigSource("A");

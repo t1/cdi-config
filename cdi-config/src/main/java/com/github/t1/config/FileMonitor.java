@@ -5,6 +5,7 @@ import static java.util.concurrent.TimeUnit.*;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -28,6 +29,8 @@ public class FileMonitor {
 
         @SneakyThrows(IOException.class)
         private FileTime lastModified() {
+            if (!Files.isRegularFile(path))
+                return FileTime.from(Instant.ofEpochMilli(0));
             return Files.getLastModifiedTime(path);
         }
 
