@@ -108,11 +108,12 @@ public class ConfigCdiExtension implements Extension {
                         if (!configPoint.description().isEmpty())
                             message += "\n  [" + configPoint.description() + "]";
                         log.error(message);
-                        throw new DefinitionException(message);
+                        // TODO CDI 1.1: use DefinitionException
+                        throw new RuntimeException(message);
                     }
                     configs.add(configPoint);
                 }
-            } catch (DefinitionException e) {
+            } catch (RuntimeException e) {
                 pit.addDefinitionError(e);
             }
         }
