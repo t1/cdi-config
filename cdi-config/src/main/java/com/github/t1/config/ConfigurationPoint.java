@@ -131,7 +131,7 @@ public abstract class ConfigurationPoint {
 
     public String name() {
         String name = config().name();
-        return Config.USE_FIELD_NAME.equals(name) ? field.getName() : name;
+        return name.isEmpty() ? field.getName() : name;
     }
 
     public String description() {
@@ -140,7 +140,7 @@ public abstract class ConfigurationPoint {
 
     public String defaultValue() {
         String defaultValue = config().defaultValue();
-        return (Config.NO_DEFAULT_VALUE.equals(defaultValue)) ? null : defaultValue;
+        return (defaultValue.isEmpty()) ? null : defaultValue;
     }
 
     protected abstract Class<?> type();

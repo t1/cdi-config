@@ -4,22 +4,24 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
 import java.lang.annotation.*;
-import java.net.URI;
 
 /**
- * see {@value #WIKI}
+ * @see <a href="https://github.com/t1/cdi-config/wiki">wiki</a>
  */
 @Retention(RUNTIME)
 @Target({ FIELD })
 public @interface Config {
-    public static final URI WIKI = URI.create("https://github.com/t1/cdi-config/wiki/");
+    /** Defaults to the field name */
+    public String name() default "";
 
-    public static final String USE_FIELD_NAME = "###_USE_FIELD_NAME_###";
-    public static final String NO_DEFAULT_VALUE = "###_NO_DEFAULT_VALUE_###";
-
-    public String name() default USE_FIELD_NAME;
-
+    /**
+     * May be used for configuration tools or config files. Must be the same on all {@link ConfigurationPoint}s or
+     * empty. It may prove helpful to use a string constant, so references are clear.
+     */
     public String description() default "";
 
-    public String defaultValue() default NO_DEFAULT_VALUE;
+    /**
+     * The string version of the default value. Must be the same on all {@link ConfigurationPoint}s.
+     */
+    public String defaultValue() default "";
 }
