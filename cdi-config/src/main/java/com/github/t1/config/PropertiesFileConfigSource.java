@@ -119,7 +119,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
             log.debug("loaded {} entries from {}", properties.size(), uri);
             return properties;
         } catch (IOException e) {
-            log.warn("can't open properties uri " + uri + ": " + e + ". Fall back to empty properties.");
+            log.info("can't open properties uri " + uri + ": " + e + ". Fall back to empty properties.");
             return new Properties();
         }
     }

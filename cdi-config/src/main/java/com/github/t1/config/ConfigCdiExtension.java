@@ -25,7 +25,7 @@ public class ConfigCdiExtension implements Extension {
         public void inject(T instance, CreationalContext<T> ctx) {
             log.trace("add config targets in {}", instance);
             for (ConfigurationPoint configurationPoint : configs) {
-                log.trace("add to config point {}", configurationPoint);
+                log.trace("add target to config point {}", configurationPoint);
                 configurationPoint.addConfigTarget(instance);
             }
             log.trace("done adding config targets in {}", instance);
@@ -55,8 +55,11 @@ public class ConfigCdiExtension implements Extension {
     }
 
     public <T> void processAnnotatedType(@Observes @WithAnnotations(Config.class) ProcessAnnotatedType<T> pat) {
-        if (!hasUnsafeConfig(pat.getAnnotatedType().getJavaClass())) {
-            log.debug("all safe in {}", pat.getAnnotatedType().getBaseType());
+        Class<T> javaClass = pat.getAnnotatedType().getJavaClass();
+        if (javaClass.isInterface())
+            return;
+        if (!hasUnsafeConfig(javaClass)) {
+            log.trace("all safe in {}", pat.getAnnotatedType().getBaseType());
             return;
         }
         addAnnotation(DelayedConfigChange.class, pat);
@@ -66,12 +69,7 @@ public class ConfigCdiExtension implements Extension {
         log.debug("add {} annotation to {}", annotationType.getSimpleName(), pat.getAnnotatedType().getBaseType());
         Set<Annotation> annotations = new HashSet<>();
         annotations.addAll(pat.getAnnotatedType().getAnnotations());
-        annotations.add(new Annotation() {
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return annotationType;
-            }
-        });
+        annotations.add(() -> annotationType);
         pat.setAnnotatedType(new AnnotatedTypeWrapper<T>(pat.getAnnotatedType()) {
             @Override
             public Set<Annotation> getAnnotations() {
@@ -82,7 +80,7 @@ public class ConfigCdiExtension implements Extension {
 
     private boolean hasUnsafeConfig(Class<?> type) {
         for (Field field : type.getDeclaredFields()) {
-            if (!isSafe(field)) {
+            if (field.isAnnotationPresent(Config.class) && !isSafe(field)) {
                 return true;
             }
         }
@@ -102,6 +100,7 @@ public class ConfigCdiExtension implements Extension {
             try {
                 ConfigurationPoint configPoint = ConfigurationPoint.on(field);
                 if (configPoint != null) {
+                    log.debug("found config point {}", configPoint);
                     configSource().configure(configPoint);
                     if (!configPoint.isConfigured()) {
                         String message = "no config value found for " + configPoint;
@@ -126,9 +125,9 @@ public class ConfigCdiExtension implements Extension {
     }
 
     public void beforeShutdown(@SuppressWarnings("unused") @Observes BeforeShutdown beforeShutdown) {
-        log.trace("shutdown start");
+        log.debug("shutdown start");
         if (configSource != null)
             configSource.shutdown();
-        log.trace("shutdown done");
+        log.debug("shutdown done");
     }
 }

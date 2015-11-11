@@ -4,6 +4,9 @@ import java.util.*;
 
 import com.github.t1.config.ConfigurationPoint.GettableConfigValue;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public abstract class MapConfigSource<T extends GettableConfigValue> implements ConfigSource {
     private final Map<String, T> map = new HashMap<>();
 
@@ -24,6 +27,7 @@ public abstract class MapConfigSource<T extends GettableConfigValue> implements 
         if (value == null) {
             value = createConfigValueFor(configPoint);
             map.put(configPoint.name(), value);
+            log.debug("created {}", value);
         }
         return value;
         // TODO the shade plugin seems to misunderstand this:
