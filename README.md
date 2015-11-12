@@ -49,6 +49,8 @@ Additionally, updating config values happens in a separate thread. `cdi-config` 
 
 Generally this is only relevant for beans that are under constant load, when it may take a long time until your config change is applied. If you do not what this delaying, you can make all configuration points thread-safe instead.
 
+Note that configured beans have to set a lock before and another lock after the actual call, so that can be a performance impact for beans that are under heavy load.
+
 ## Reserved For Future Use
 
 Keys starting with a non-letter are reserved, e.g. for meta properties used to configure cdi-config itself (e.g. for `*import*` properties).

@@ -3,7 +3,6 @@ package com.github.t1.config;
 import static javax.interceptor.Interceptor.Priority.*;
 
 import java.util.*;
-import java.util.concurrent.atomic.*;
 
 import javax.annotation.Priority;
 import javax.interceptor.*;
@@ -19,50 +18,57 @@ public class ConfigChangeDelayInterceptor {
     private static final Map<Object, ConfigChangeDelayInterceptor> INTERCEPTORS = new WeakHashMap<>();
 
     public static void run(Object target, Runnable runnable) {
-        ConfigChangeDelayInterceptor interceptor = INTERCEPTORS.get(target);
-        if (interceptor == null) {
-            log.debug("direct apply");
-            runnable.run();
-        } else {
-            interceptor.run(runnable);
-        }
-    }
-
-    private final AtomicInteger counter = new AtomicInteger();
-    private final AtomicReference<Runnable> action = new AtomicReference<>();
-
-    @AroundInvoke
-    Object aroundInvoke(InvocationContext context) throws Exception {
-        acquire(context.getTarget());
-        try {
-            return context.proceed();
-        } finally {
-            release();
-        }
-    }
-
-    private void acquire(Object target) {
-        INTERCEPTORS.put(target, this); // it's probably cheaper to just overwrite
-        counter.incrementAndGet();
-    }
-
-    private void release() {
-        if (counter.decrementAndGet() <= 0) {
-            Runnable runnable = action.getAndSet(null);
-            if (runnable != null) {
-                log.debug("delayed apply");
+        synchronized (target) {
+            ConfigChangeDelayInterceptor interceptor = INTERCEPTORS.get(target);
+            if (interceptor == null) {
+                log.debug("direct apply");
                 runnable.run();
+            } else {
+                interceptor.run(runnable);
             }
         }
     }
 
+    private int counter = 0;
+    private Runnable action = null;
+
     private void run(Runnable runnable) {
-        if (counter.get() > 0) {
+        if (counter > 0) {
             log.debug("delay apply");
-            this.action.set(runnable); // only the latest
+            this.action = runnable; // only the latest
         } else {
             log.debug("immediate apply");
             runnable.run();
+        }
+    }
+
+    @AroundInvoke
+    public Object aroundInvoke(InvocationContext context) throws Exception {
+        acquire(context.getTarget());
+        try {
+            return context.proceed();
+        } finally {
+            release(context.getTarget());
+        }
+    }
+
+    private void acquire(Object target) {
+        synchronized (target) {
+            INTERCEPTORS.put(target, this); // it's probably cheaper to just overwrite
+            ++counter;
+        }
+    }
+
+    private synchronized void release(Object target) {
+        synchronized (target) {
+            if (--counter <= 0) {
+                Runnable runnable = this.action;
+                this.action = null;
+                if (runnable != null) {
+                    log.debug("delayed apply");
+                    runnable.run();
+                }
+            }
         }
     }
 }
