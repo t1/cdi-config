@@ -1,6 +1,6 @@
 package com.github.t1.config;
 
-import static com.github.t1.config.ConfigurationPoint.*;
+import static com.github.t1.config.ConfigPoint.*;
 
 import java.net.*;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ConfigSourceLoader {
+    private static final String DEFAULT_CONFIG_RESOURCE = "configuration.properties";
+
     private final URI uri;
 
     public ConfigSourceLoader() {
@@ -19,7 +21,7 @@ public class ConfigSourceLoader {
     private static URI rootConfigSourceUri() {
         String result = System.getProperty("cdi-config.config-source");
         if (result == null)
-            result = "classpath:configuration.properties";
+            result = "classpath:" + DEFAULT_CONFIG_RESOURCE;
         return URI.create(result);
     }
 
@@ -58,7 +60,7 @@ public class ConfigSourceLoader {
             classLoader = ClassLoader.getSystemClassLoader();
         URL resource = classLoader.getResource(uri.getSchemeSpecificPart());
         if (resource == null)
-            throw new RuntimeException("no file configuration.properties found");
+            throw new RuntimeException("no file '" + DEFAULT_CONFIG_RESOURCE + "' found");
         return resource.toURI();
     }
 

@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UpdateConfigTest extends AbstractTest {
     public static class UpdatingConfigSource implements ConfigSource {
         @Override
-        public void configure(ConfigurationPoint configPoint) {
+        public void configure(ConfigPoint configPoint) {
             if ("java-config-string".equals(configPoint.name())) {
                 assertNull(configValue);
                 configValue = new SimpleUpdatableConfigValue(configPoint, "initial-value");

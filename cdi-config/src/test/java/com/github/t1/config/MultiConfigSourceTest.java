@@ -17,7 +17,7 @@ public class MultiConfigSourceTest {
         }
 
         @Override
-        public void configure(ConfigurationPoint configPoint) {}
+        public void configure(ConfigPoint configPoint) {}
     }
 
     private static final ConfigSource A = new DummyConfigSource("A");

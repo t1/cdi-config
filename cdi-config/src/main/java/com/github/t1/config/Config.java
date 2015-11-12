@@ -15,13 +15,13 @@ public @interface Config {
     public String name() default "";
 
     /**
-     * May be used for configuration tools or config files. Must be the same on all {@link ConfigurationPoint}s or
-     * empty. It may prove helpful to use a string constant, so references are clear.
+     * May be used for config tools or config files. Must be the same on all {@link ConfigPoint}s or empty. It may prove
+     * helpful to use a string constant, so references are clear.
      */
     public String description() default "";
 
     /**
-     * The string version of the default value. Must be the same on all {@link ConfigurationPoint}s.
+     * The string version of the default value. Must be the same on all {@link ConfigPoint}s.
      */
     public String defaultValue() default "";
 }

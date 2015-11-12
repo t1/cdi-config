@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import com.github.t1.config.ConfigurationPoint.UpdatableConfigValue;
+import com.github.t1.config.ConfigPoint.UpdatableConfigValue;
 import com.github.t1.config.SystemPropertiesConfigSource.SystemPropertiesConfigValue;
 
 @Slf4j
@@ -18,7 +18,7 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
     class SystemPropertiesConfigValue extends UpdatableConfigValue {
         private final String lastStringValue;
 
-        public SystemPropertiesConfigValue(ConfigurationPoint configPoint) {
+        public SystemPropertiesConfigValue(ConfigPoint configPoint) {
             configPoint.super();
             this.lastStringValue = stringValue();
         }
@@ -76,7 +76,7 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
     }
 
     @Override
-    protected SystemPropertiesConfigValue createConfigValueFor(ConfigurationPoint configPoint) {
+    protected SystemPropertiesConfigValue createConfigValueFor(ConfigPoint configPoint) {
         return new SystemPropertiesConfigValue(configPoint);
     }
 }

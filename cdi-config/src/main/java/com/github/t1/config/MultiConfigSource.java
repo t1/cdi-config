@@ -27,7 +27,7 @@ class MultiConfigSource implements ConfigSource {
     }
 
     @Override
-    public void configure(ConfigurationPoint configPoint) {
+    public void configure(ConfigPoint configPoint) {
         for (ConfigSource source : sources) {
             if (configPoint.isConfigured())
                 break;

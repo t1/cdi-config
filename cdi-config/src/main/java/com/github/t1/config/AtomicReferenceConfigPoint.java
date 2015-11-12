@@ -3,8 +3,8 @@ package com.github.t1.config;
 import java.lang.reflect.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-class AtomicReferenceConfigurationPoint extends ConfigurationPoint {
-    public AtomicReferenceConfigurationPoint(Field field) {
+class AtomicReferenceConfigPoint extends ConfigPoint {
+    public AtomicReferenceConfigPoint(Field field) {
         super(field);
     }
 

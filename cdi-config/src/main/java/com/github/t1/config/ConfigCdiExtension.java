@@ -14,9 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConfigCdiExtension implements Extension {
     private static class ConfiguringInjectionTarget<T> extends InjectionTargetWrapper<T> {
-        private final List<ConfigurationPoint> configs;
+        private final List<ConfigPoint> configs;
 
-        private ConfiguringInjectionTarget(InjectionTarget<T> delegate, List<ConfigurationPoint> configs) {
+        private ConfiguringInjectionTarget(InjectionTarget<T> delegate, List<ConfigPoint> configs) {
             super(delegate);
             this.configs = configs;
         }
@@ -24,9 +24,9 @@ public class ConfigCdiExtension implements Extension {
         @Override
         public void inject(T instance, CreationalContext<T> ctx) {
             log.trace("add config targets in {}", instance);
-            for (ConfigurationPoint configurationPoint : configs) {
-                log.trace("add target to config point {}", configurationPoint);
-                configurationPoint.addConfigTarget(instance);
+            for (ConfigPoint configPoint : configs) {
+                log.trace("add target to config point {}", configPoint);
+                configPoint.addConfigTarget(instance);
             }
             log.trace("done adding config targets in {}", instance);
 
@@ -38,15 +38,15 @@ public class ConfigCdiExtension implements Extension {
             super.preDestroy(instance);
 
             log.trace("remove config targets in {}", instance);
-            for (ConfigurationPoint configurationPoint : configs) {
-                log.trace("remove from config point {}", configurationPoint);
-                configurationPoint.removeConfigTarget(instance);
+            for (ConfigPoint configPoint : configs) {
+                log.trace("remove from config point {}", configPoint);
+                configPoint.removeConfigTarget(instance);
             }
             log.trace("done removing config targets in {}", instance);
         }
     }
 
-    private DefaultValueChecker checker = new DefaultValueChecker();
+    private final Map<String, ConfigPoint> configPoints = new HashMap<>();
 
     private ConfigSource configSource;
 
@@ -95,15 +95,15 @@ public class ConfigCdiExtension implements Extension {
 
     public <T> void processInjectionTarget(@Observes ProcessInjectionTarget<T> pit) {
         Class<T> type = pit.getAnnotatedType().getJavaClass();
-        log.trace("scan {} for configuration points", type);
+        log.trace("scan {} for config points", type);
 
-        List<ConfigurationPoint> configs = new ArrayList<>();
+        List<ConfigPoint> configs = new ArrayList<>();
         for (Field field : type.getDeclaredFields()) {
             try {
-                ConfigurationPoint configPoint = ConfigurationPoint.on(field);
+                ConfigPoint configPoint = ConfigPoint.on(field);
                 if (configPoint != null) {
                     log.debug("found config point {}", configPoint);
-                    checker.check(configPoint);
+                    check(configPoint);
                     configSource().configure(configPoint);
                     if (!configPoint.isConfigured()) {
                         String message = "no config value found for " + configPoint + " and no default value specified";
@@ -124,6 +124,26 @@ public class ConfigCdiExtension implements Extension {
             InjectionTarget<T> it = pit.getInjectionTarget();
             log.debug("found {} config points in {}", configs.size(), pit.getAnnotatedType());
             pit.setInjectionTarget(new ConfiguringInjectionTarget<>(it, configs));
+        }
+    }
+
+    /**
+     * Checks that all {@link Config#defaultValue}s are the same. This has to be done before the first configSource is
+     * consulted, so even if a value is configured, a mismatch in the default value is reported.
+     */
+    public void check(ConfigPoint configPoint) {
+        String configValue = configPoint.defaultValue().orElse("");
+        String name = configPoint.name();
+        ConfigPoint existingConfigPoint = configPoints.get(name);
+        if (existingConfigPoint == null) {
+            configPoints.put(name, configPoint);
+        } else {
+            String existingValue = existingConfigPoint.defaultValue().orElse("");
+            if (!existingValue.equals(configValue))
+                // TODO CDI 1.1: use DefinitionException
+                throw new RuntimeException("default value mismatch:\n" //
+                        + ": " + existingConfigPoint + " -> '" + existingValue + "'\n" //
+                        + ": " + configPoint + " -> '" + configValue + "'");
         }
     }
 

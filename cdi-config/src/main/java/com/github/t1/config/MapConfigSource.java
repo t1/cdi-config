@@ -3,7 +3,7 @@ package com.github.t1.config;
 import java.lang.reflect.Field;
 import java.util.*;
 
-import com.github.t1.config.ConfigurationPoint.ConfigValue;
+import com.github.t1.config.ConfigPoint.ConfigValue;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,7 +12,7 @@ public abstract class MapConfigSource<T extends ConfigValue> implements ConfigSo
     private final Map<Field, T> map = new HashMap<>();
 
     @Override
-    public void configure(ConfigurationPoint configPoint) {
+    public void configure(ConfigPoint configPoint) {
         T configValue = configValueFor(configPoint);
         if (configValue.getValue() != null) {
             configPoint.setConfigValue(configValue);
@@ -23,7 +23,7 @@ public abstract class MapConfigSource<T extends ConfigValue> implements ConfigSo
         return map.values();
     }
 
-    private T configValueFor(ConfigurationPoint configPoint) {
+    private T configValueFor(ConfigPoint configPoint) {
         return map.computeIfAbsent(configPoint.getField(), c -> {
             T value = createConfigValueFor(configPoint);
             log.debug("created {}", value);
@@ -31,5 +31,5 @@ public abstract class MapConfigSource<T extends ConfigValue> implements ConfigSo
         });
     }
 
-    protected abstract T createConfigValueFor(ConfigurationPoint configPoint);
+    protected abstract T createConfigValueFor(ConfigPoint configPoint);
 }

@@ -17,12 +17,12 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * The point where a configuration should go into, i.e. the field annotated as {@link Config}. This is on the class
- * level, not the instance.
+ * The point where a config should go into, i.e. the field annotated as {@link Config}. This is on the class level, not
+ * the instance.
  */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class ConfigurationPoint {
+public abstract class ConfigPoint {
     private static final Pattern EXPRESSION = Pattern.compile("\\{(?<key>[^}]*)\\}");
     private static final StringConvert STRING_CONVERT = StringConvert.INSTANCE;
 
@@ -50,8 +50,8 @@ public abstract class ConfigurationPoint {
 
     @RequiredArgsConstructor
     public abstract class ConfigValue {
-        protected ConfigurationPoint configPoint() {
-            return ConfigurationPoint.this;
+        protected ConfigPoint configPoint() {
+            return ConfigPoint.this;
         }
 
         protected Object convert(String value) {
@@ -74,7 +74,7 @@ public abstract class ConfigurationPoint {
 
         /**
          * Do <em>not</em> produce the actual value... could be, e.g., a password. <br/>
-         * And take care to not recurse into {@link ConfigurationPoint#toString()}
+         * And take care to not recurse into {@link ConfigPoint#toString()}
          */
         @Override
         public String toString() {
@@ -104,13 +104,13 @@ public abstract class ConfigurationPoint {
         }
     }
 
-    public static ConfigurationPoint on(Field field) {
+    public static ConfigPoint on(Field field) {
         if (config(field) == null)
             return null;
         field.setAccessible(true);
         return (field.getType().isAssignableFrom(AtomicReference.class)) //
-                ? new AtomicReferenceConfigurationPoint(field) //
-                : new StandardConfigurationPoint(field) //
+                ? new AtomicReferenceConfigPoint(field) //
+                : new StandardConfigPoint(field) //
                 ;
     }
 
