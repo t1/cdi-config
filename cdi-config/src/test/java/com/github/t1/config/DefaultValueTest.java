@@ -9,9 +9,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(Arquillian.class)
-public class MultiConfigsTest extends AbstractTest {
+public class DefaultValueTest extends AbstractTest {
     public static class A {
-        @Config
+        @Config(defaultValue = "fallback")
         String string;
 
         @Config(defaultValue = "fallback")
@@ -32,14 +32,14 @@ public class MultiConfigsTest extends AbstractTest {
     B b;
 
     @Test
-    public void shouldConfigureTwoWithTheSameName() {
-        assertThat(a.string).isEqualTo("test-value");
-        assertThat(b.string).isEqualTo("test-value");
+    public void shouldNotUseDefaultValueWhenConfigured() {
+        assertThat(a.string).isEqualTo("test-value"); // not the fallback
+        assertThat(b.string).isEqualTo("test-value"); // no fallback available
     }
 
     @Test
-    public void shouldConfigureTwoWithTheDefaultValue() {
-        assertThat(a.unconfigured).isEqualTo("fallback");
-        assertThat(b.unconfigured).isEqualTo("fallback");
+    public void shouldUseDefaultValueWhenUnconfigured() {
+        assertThat(a.unconfigured).isEqualTo("fallback"); // use fallback
+        assertThat(b.unconfigured).isEqualTo("fallback"); // and here as well
     }
 }

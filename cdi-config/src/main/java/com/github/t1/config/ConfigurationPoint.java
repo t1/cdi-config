@@ -55,8 +55,6 @@ public abstract class ConfigurationPoint {
         }
 
         protected Object convert(String value) {
-            if (value == null)
-                value = configPoint().defaultValue();
             return STRING_CONVERT.convertFromString(configPoint().type(), resolve(value));
         }
 
@@ -66,9 +64,13 @@ public abstract class ConfigurationPoint {
             return resolveExpressions(value);
         }
 
-        public abstract void addConfigTartet(Object target);
+        public void addConfigTartet(Object target) {
+            configPoint().set(target, getValue());
+        }
 
-        public abstract void removeConfigTartet(Object target);
+        protected abstract Object getValue();
+
+        public void removeConfigTartet(@SuppressWarnings("unused") Object target) {}
 
         /**
          * Do <em>not</em> produce the actual value... could be, e.g., a password. <br/>
@@ -80,11 +82,7 @@ public abstract class ConfigurationPoint {
         }
     }
 
-    public abstract class GettableConfigValue extends ConfigValue {
-        protected abstract Object getValue();
-    }
-
-    public abstract class UpdatableConfigValue extends GettableConfigValue {
+    public abstract class UpdatableConfigValue extends ConfigValue {
         private final List<Object> targets = new ArrayList<>();
 
         @Override

@@ -70,9 +70,6 @@ public class ConfigTest extends AbstractTest {
         @Config(name = "user.name")
         String userName;
 
-        @Config(defaultValue = "default-value")
-        String defaultValue;
-
         @Produces
         Pojo producePojo() {
             return new Pojo(bool ? "foo" : "bar");
@@ -156,11 +153,6 @@ public class ConfigTest extends AbstractTest {
     @Test
     public void shouldOverwritePropertyValueWithSystemProperty() {
         assertEquals(System.getProperty("user.name"), tbc.userName);
-    }
-
-    @Test
-    public void shouldGetDefaultValue() {
-        assertEquals("default-value", tbc.defaultValue);
     }
 
     @Test

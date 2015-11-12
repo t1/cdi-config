@@ -1,21 +1,13 @@
 package com.github.t1.config;
 
-import com.github.t1.config.ConfigurationPoint.GettableConfigValue;
+import com.github.t1.config.ConfigurationPoint.ConfigValue;
 import com.github.t1.config.EnvironmentVariablesConfigSource.EnvironmentVariableConfigValue;
 
 public class EnvironmentVariablesConfigSource extends MapConfigSource<EnvironmentVariableConfigValue> {
-    class EnvironmentVariableConfigValue extends GettableConfigValue {
+    class EnvironmentVariableConfigValue extends ConfigValue {
         public EnvironmentVariableConfigValue(ConfigurationPoint configPoint) {
             configPoint.super();
         }
-
-        @Override
-        public void addConfigTartet(Object target) {
-            configPoint().set(target, getValue());
-        }
-
-        @Override
-        public void removeConfigTartet(Object target) {}
 
         @Override
         public Object getValue() {

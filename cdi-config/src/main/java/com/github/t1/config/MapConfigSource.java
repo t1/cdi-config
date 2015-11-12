@@ -3,12 +3,12 @@ package com.github.t1.config;
 import java.lang.reflect.Field;
 import java.util.*;
 
-import com.github.t1.config.ConfigurationPoint.GettableConfigValue;
+import com.github.t1.config.ConfigurationPoint.ConfigValue;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class MapConfigSource<T extends GettableConfigValue> implements ConfigSource {
+public abstract class MapConfigSource<T extends ConfigValue> implements ConfigSource {
     private final Map<Field, T> map = new HashMap<>();
 
     @Override

@@ -27,20 +27,21 @@ public class ConfigSourceLoader {
         return MultiConfigSource.of( //
                 new SystemPropertiesConfigSource(), //
                 new EnvironmentVariablesConfigSource(), //
-                loadConfigSource(uri));
+                loadConfigSource(uri), //
+                new DefaultValueConfigSource());
     }
 
     private ConfigSource loadConfigSource(URI uri) {
         log.debug("load config source {}", uri);
         switch (uri.getScheme()) {
-            case "java":
-                return insantiate(uri.getSchemeSpecificPart());
-            case "classpath":
-                uri = resolveClasspath(uri);
-                // fall through:
-            default:
-                PropertiesFileConfigSource configSource = new PropertiesFileConfigSource(uri);
-                return resolveImports(configSource);
+        case "java":
+            return insantiate(uri.getSchemeSpecificPart());
+        case "classpath":
+            uri = resolveClasspath(uri);
+            // fall through:
+        default:
+            PropertiesFileConfigSource configSource = new PropertiesFileConfigSource(uri);
+            return resolveImports(configSource);
         }
     }
 

@@ -5,23 +5,24 @@ import java.util.*;
 class MultiConfigSource implements ConfigSource {
     public static ConfigSource of(ConfigSource... sources) {
         List<ConfigSource> sourceList = new ArrayList<>(Arrays.asList(sources));
+
         MultiConfigSource multi = (sourceList.get(0) instanceof MultiConfigSource) //
                 ? (MultiConfigSource) sourceList.remove(0) //
                 : new MultiConfigSource();
-        multi.add(sourceList);
+
+        for (ConfigSource source : sourceList)
+            multi.add(source);
         return multi;
     }
 
     private final List<ConfigSource> sources = new ArrayList<>();
 
-    private void add(List<ConfigSource> sources) {
-        for (ConfigSource source : sources) {
-            if (source instanceof MultiConfigSource) {
-                MultiConfigSource subMulti = (MultiConfigSource) source;
-                this.sources.addAll(subMulti.sources);
-            } else {
-                this.sources.add(source);
-            }
+    private void add(ConfigSource source) {
+        if (source instanceof MultiConfigSource) {
+            MultiConfigSource subMulti = (MultiConfigSource) source;
+            this.sources.addAll(subMulti.sources);
+        } else {
+            this.sources.add(source);
         }
     }
 
