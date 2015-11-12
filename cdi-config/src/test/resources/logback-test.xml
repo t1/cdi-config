@@ -10,6 +10,8 @@
     </root>
 
     <logger name="com.github.t1.config" level="DEBUG" />
+    <!--
     <logger name="com.github.t1.config.FileMonitor" level="ALL" />
     <logger name="com.github.t1.config.SystemPropertiesConfigSource" level="ALL" />
+    -->
 </configuration>

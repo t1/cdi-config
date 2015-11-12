@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 /** Takes care of delaying config updates to a bean until it's not being executed */
 @Slf4j
 @Interceptor
-@DelayedConfigChange
+@ConfiguredBean
 @Priority(LIBRARY_BEFORE)
 public class ConfigChangeDelayInterceptor {
     private static final Map<Object, ConfigChangeDelayInterceptor> INTERCEPTORS = new WeakHashMap<>();

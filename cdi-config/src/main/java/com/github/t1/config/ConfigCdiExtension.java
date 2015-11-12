@@ -62,7 +62,7 @@ public class ConfigCdiExtension implements Extension {
             log.trace("all safe in {}", pat.getAnnotatedType().getBaseType());
             return;
         }
-        addAnnotation(DelayedConfigChange.class, pat);
+        addAnnotation(ConfiguredBean.class, pat);
     }
 
     private <T> void addAnnotation(Class<? extends Annotation> annotationType, ProcessAnnotatedType<T> pat) {
@@ -103,7 +103,7 @@ public class ConfigCdiExtension implements Extension {
                     log.debug("found config point {}", configPoint);
                     configSource().configure(configPoint);
                     if (!configPoint.isConfigured()) {
-                        String message = "no config value found for " + configPoint;
+                        String message = "no config value found for " + configPoint + " and no default value specified";
                         if (!configPoint.description().isEmpty())
                             message += "\n  [" + configPoint.description() + "]";
                         log.error(message);
