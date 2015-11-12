@@ -136,9 +136,9 @@ public abstract class ConfigurationPoint {
         return config().description();
     }
 
-    public String defaultValue() {
+    public Optional<String> defaultValue() {
         String defaultValue = config().defaultValue();
-        return (defaultValue.isEmpty()) ? null : defaultValue;
+        return (defaultValue.isEmpty()) ? Optional.empty() : Optional.of(defaultValue);
     }
 
     protected abstract Class<?> type();

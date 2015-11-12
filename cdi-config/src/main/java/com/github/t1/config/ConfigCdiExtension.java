@@ -46,6 +46,8 @@ public class ConfigCdiExtension implements Extension {
         }
     }
 
+    private DefaultValueChecker checker = new DefaultValueChecker();
+
     private ConfigSource configSource;
 
     private ConfigSource configSource() {
@@ -101,13 +103,14 @@ public class ConfigCdiExtension implements Extension {
                 ConfigurationPoint configPoint = ConfigurationPoint.on(field);
                 if (configPoint != null) {
                     log.debug("found config point {}", configPoint);
+                    checker.check(configPoint);
                     configSource().configure(configPoint);
                     if (!configPoint.isConfigured()) {
                         String message = "no config value found for " + configPoint + " and no default value specified";
                         if (!configPoint.description().isEmpty())
                             message += "\n  [" + configPoint.description() + "]";
                         log.error(message);
-                        // TODO CDI 1.1: use DefinitionException
+                        // TODO CDI 1.1: use DefinitionException. here and in the catch a few lines down
                         throw new RuntimeException(message);
                     }
                     configs.add(configPoint);

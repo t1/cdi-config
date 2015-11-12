@@ -19,7 +19,7 @@ public class DefaultValueTest extends AbstractTest {
     }
 
     public static class B {
-        @Config
+        @Config(defaultValue = "fallback")
         String string;
 
         @Config(defaultValue = "fallback")
@@ -33,13 +33,13 @@ public class DefaultValueTest extends AbstractTest {
 
     @Test
     public void shouldNotUseDefaultValueWhenConfigured() {
-        assertThat(a.string).isEqualTo("test-value"); // not the fallback
-        assertThat(b.string).isEqualTo("test-value"); // no fallback available
+        assertThat(a.string).isEqualTo("test-value");
+        assertThat(b.string).isEqualTo("test-value");
     }
 
     @Test
     public void shouldUseDefaultValueWhenUnconfigured() {
-        assertThat(a.unconfigured).isEqualTo("fallback"); // use fallback
-        assertThat(b.unconfigured).isEqualTo("fallback"); // and here as well
+        assertThat(a.unconfigured).isEqualTo("fallback");
+        assertThat(b.unconfigured).isEqualTo("fallback");
     }
 }

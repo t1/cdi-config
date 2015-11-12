@@ -15,13 +15,18 @@ public class DefaultValueConfigSource implements ConfigSource {
         protected Object getValue() {
             return convert(value);
         }
+
+        @Override
+        public String toString() {
+            return super.toString() + " from default value";
+        }
     }
 
     @Override
     public void configure(ConfigurationPoint configPoint) {
-        String defaultValue = configPoint.defaultValue();
-        if (defaultValue == null)
-            return;
-        configPoint.setConfigValue(new StaticConfigValue(configPoint, defaultValue));
+        configPoint.defaultValue().ifPresent(defaultValue -> {
+            StaticConfigValue value = new StaticConfigValue(configPoint, defaultValue);
+            configPoint.setConfigValue(value);
+        });
     }
 }
