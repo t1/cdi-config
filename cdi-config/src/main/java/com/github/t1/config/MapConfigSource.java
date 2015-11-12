@@ -1,5 +1,6 @@
 package com.github.t1.config;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 import com.github.t1.config.ConfigurationPoint.GettableConfigValue;
@@ -8,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class MapConfigSource<T extends GettableConfigValue> implements ConfigSource {
-    private final Map<String, T> map = new HashMap<>();
+    private final Map<Field, T> map = new HashMap<>();
 
     @Override
     public void configure(ConfigurationPoint configPoint) {
@@ -23,15 +24,11 @@ public abstract class MapConfigSource<T extends GettableConfigValue> implements 
     }
 
     private T configValueFor(ConfigurationPoint configPoint) {
-        T value = map.get(configPoint.name());
-        if (value == null) {
-            value = createConfigValueFor(configPoint);
-            map.put(configPoint.name(), value);
+        return map.computeIfAbsent(configPoint.getField(), c -> {
+            T value = createConfigValueFor(configPoint);
             log.debug("created {}", value);
-        }
-        return value;
-        // TODO the shade plugin seems to misunderstand this:
-        // return map.computeIfAbsent(configPoint.name(), (c) -> new SystemPropertiesConfigValue(configPoint));
+            return value;
+        });
     }
 
     protected abstract T createConfigValueFor(ConfigurationPoint configPoint);
