@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(Arquillian.class)
-public class ConfigAnnotationMatchingTest extends AbstractTest {
+public class ConfigAnnotationMatchingIT extends AbstractIT {
     public static class A {
         @Config(defaultValue = "fallback")
         String string;

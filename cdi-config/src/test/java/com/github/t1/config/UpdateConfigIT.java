@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RunWith(Arquillian.class)
-public class UpdateConfigTest extends AbstractTest {
+public class UpdateConfigIT extends AbstractIT {
     public static class UpdatingConfigSource implements ConfigSource {
         @Override
         public void configure(ConfigPoint configPoint) {

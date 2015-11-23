@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RunWith(Arquillian.class)
-public class ConfigTest extends AbstractTest {
+public class ConfigIT extends AbstractIT {
     @Value
     public static class Pojo {
         String value;

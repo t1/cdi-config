@@ -10,7 +10,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 
 import lombok.SneakyThrows;
 
-abstract class AbstractTest {
+abstract class AbstractIT {
     @Deployment
     public static JavaArchive createArquillianDeployment() {
         return ShrinkWrap.create(JavaArchive.class) //
