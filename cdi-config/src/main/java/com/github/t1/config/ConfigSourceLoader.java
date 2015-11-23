@@ -60,7 +60,7 @@ public class ConfigSourceLoader {
             classLoader = ClassLoader.getSystemClassLoader();
         URL resource = classLoader.getResource(uri.getSchemeSpecificPart());
         if (resource == null)
-            throw new RuntimeException("no file '" + DEFAULT_CONFIG_RESOURCE + "' found");
+            throw new RuntimeException("resource '" + uri + "' not found");
         return resource.toURI();
     }
 

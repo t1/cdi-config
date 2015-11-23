@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
@@ -131,20 +132,30 @@ public class ConfigCdiExtension implements Extension {
      * Checks that all {@link Config#defaultValue}s are the same. This has to be done before the first configSource is
      * consulted, so even if a value is configured, a mismatch in the default value is reported.
      */
-    public void check(ConfigPoint configPoint) {
-        String configValue = configPoint.defaultValue().orElse("");
-        String name = configPoint.name();
+    public void check(ConfigPoint newConfigPoint) {
+        String name = newConfigPoint.name();
         ConfigPoint existingConfigPoint = configPoints.get(name);
         if (existingConfigPoint == null) {
-            configPoints.put(name, configPoint);
+            configPoints.put(name, newConfigPoint);
         } else {
-            String existingValue = existingConfigPoint.defaultValue().orElse("");
-            if (!existingValue.equals(configValue))
-                // TODO CDI 1.1: use DefinitionException
-                throw new RuntimeException("default value mismatch:\n" //
-                        + ": " + existingConfigPoint + " -> '" + existingValue + "'\n" //
-                        + ": " + configPoint + " -> '" + configValue + "'");
+            check("default value", newConfigPoint, existingConfigPoint, config -> config.defaultValue());
+            check("description", newConfigPoint, existingConfigPoint, config -> config.description());
         }
+    }
+
+    private void check(String what, ConfigPoint newConfigPoint, ConfigPoint existingConfigPoint,
+            Function<Config, String> extractor) {
+        String newValue = extractor.apply(newConfigPoint.config());
+        String existingValue = extractor.apply(existingConfigPoint.config());
+        if (!existingValue.equals(newValue))
+            // TODO CDI 1.1: use DefinitionException
+            throw new RuntimeException(what + " mismatch:\n" //
+                    + ": " + existingConfigPoint + " -> '" + existingValue + "'\n" //
+                    + ": " + newConfigPoint + " -> '" + newValue + "'");
+    }
+
+    public Map<String, ConfigPoint> configPoints() {
+        return configPoints;
     }
 
     public void beforeShutdown(@SuppressWarnings("unused") @Observes BeforeShutdown beforeShutdown) {

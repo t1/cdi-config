@@ -123,7 +123,7 @@ public abstract class ConfigPoint {
 
     private ConfigValue configValue;
 
-    private Config config() {
+    Config config() {
         return config(field);
     }
 

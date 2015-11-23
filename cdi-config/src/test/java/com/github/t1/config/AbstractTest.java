@@ -12,8 +12,10 @@ import lombok.SneakyThrows;
 
 abstract class AbstractTest {
     @Deployment
-    public static JavaArchive loggingInterceptorDeployment() {
-        return ShrinkWrap.create(JavaArchive.class).addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+    public static JavaArchive createArquillianDeployment() {
+        return ShrinkWrap.create(JavaArchive.class) //
+                .addClasses(ConfigListProducer.class) //
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }
 
     @SneakyThrows(IOException.class)
