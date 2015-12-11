@@ -138,7 +138,7 @@ public abstract class ConfigPoint {
 
     public Optional<String> defaultValue() {
         String defaultValue = config().defaultValue();
-        return (defaultValue.isEmpty()) ? Optional.empty() : Optional.of(defaultValue);
+        return (Config.NO_DEFAULT_VALUE.equals(defaultValue)) ? Optional.empty() : Optional.of(defaultValue);
     }
 
     protected abstract Class<?> type();

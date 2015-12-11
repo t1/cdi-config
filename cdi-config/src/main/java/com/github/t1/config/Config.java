@@ -11,6 +11,8 @@ import java.lang.annotation.*;
 @Retention(RUNTIME)
 @Target({ FIELD })
 public @interface Config {
+    public static final String NO_DEFAULT_VALUE = "$$$\n###\t NO_DEFAULT_VALUE \t###\n$$$";
+
     /** Defaults to the field name */
     public String name() default "";
 
@@ -23,5 +25,5 @@ public @interface Config {
     /**
      * The string version of the default value. Must be the same on all {@link ConfigPoint}s.
      */
-    public String defaultValue() default "";
+    public String defaultValue() default NO_DEFAULT_VALUE;
 }
