@@ -160,7 +160,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
             return;
         PropertyConfigValue configValue = new PropertyConfigValue(configPoint);
         property.add(configValue);
-        configPoint.setConfigValue(configValue);
+        configPoint.configValue(configValue);
     }
 
     private Property getProperty(ConfigPoint configPoint) {

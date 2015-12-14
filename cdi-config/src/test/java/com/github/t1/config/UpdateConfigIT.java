@@ -23,7 +23,7 @@ public class UpdateConfigIT extends AbstractIT {
             if ("java-config-string".equals(configPoint.name())) {
                 assertNull(configValue);
                 configValue = new SimpleUpdatableConfigValue(configPoint, "initial-value");
-                configPoint.setConfigValue(configValue);
+                configPoint.configValue(configValue);
             }
         }
     }

@@ -9,7 +9,7 @@ class AtomicReferenceConfigPoint extends ConfigPoint {
     }
 
     @Override
-    protected Class<?> type() {
+    public Class<?> type() {
         return (Class<?>) ((ParameterizedType) getField().getGenericType()).getActualTypeArguments()[0];
     }
 

@@ -26,4 +26,11 @@ public @interface Config {
      * The string version of the default value. Must be the same on all {@link ConfigPoint}s.
      */
     public String defaultValue() default NO_DEFAULT_VALUE;
+
+    /**
+     * A JSON string of meta data about this config. To make the JSON more readable, single quotes <code>'</code> will
+     * be replace with double quotes <code>"</code>. E.g., config editors can use this for things like grouping configs
+     * into categories
+     */
+    public String meta() default "";
 }

@@ -121,8 +121,6 @@ public abstract class ConfigPoint {
     @Getter(PROTECTED)
     private final Field field;
 
-    private ConfigValue configValue;
-
     Config config() {
         return config(field);
     }
@@ -136,14 +134,28 @@ public abstract class ConfigPoint {
         return config().description();
     }
 
+    public Class<?> container() {
+        return field.getDeclaringClass();
+    }
+
+    public String meta() {
+        return config().meta();
+    }
+
     public Optional<String> defaultValue() {
         String defaultValue = config().defaultValue();
         return (Config.NO_DEFAULT_VALUE.equals(defaultValue)) ? Optional.empty() : Optional.of(defaultValue);
     }
 
-    protected abstract Class<?> type();
+    public abstract Class<?> type();
 
-    public void setConfigValue(ConfigValue configValue) {
+    private ConfigValue configValue;
+
+    public ConfigValue configValue() {
+        return configValue;
+    }
+
+    public void configValue(ConfigValue configValue) {
         this.configValue = configValue;
         log.debug("configure {}", this);
     }

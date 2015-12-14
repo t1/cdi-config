@@ -57,6 +57,10 @@ public class ConfigIT {
         String line = GET("configured/all");
 
         assertThat(line).isEqualTo(
-                "[@com.github.t1.config.Config(name=config-key, description=the value to be configured, defaultValue=default-value)]");
+                "["
+                        + "ConfigInfo(name=config-key, description=the value to be configured, "
+                        + "defaultValue=default-value, value=configured-value, type=class java.lang.String, "
+                        + "container=class com.github.t1.config.ConfiguredResource, meta={\"meta-string\":\"meta-value\",\"meta-flag\":true})"
+                        + "]");
     }
 }

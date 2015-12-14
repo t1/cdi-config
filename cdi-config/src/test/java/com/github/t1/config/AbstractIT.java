@@ -14,7 +14,7 @@ abstract class AbstractIT {
     @Deployment
     public static JavaArchive createArquillianDeployment() {
         return ShrinkWrap.create(JavaArchive.class) //
-                .addClasses(ConfigListProducer.class) //
+                .addClasses(ConfigInfoProducer.class) //
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }
 

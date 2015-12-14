@@ -20,7 +20,8 @@ public class ConfiguredResource implements Serializable {
     private static int nextId = 0;
     private final int id = nextId++;
 
-    @Config(name = "config-key", description = "the value to be configured", defaultValue = "default-value")
+    @Config(name = "config-key", description = "the value to be configured", defaultValue = "default-value",
+            meta = "{'meta-string':'meta-value','meta-flag':true}")
     volatile String value;
 
     @GET
@@ -37,7 +38,7 @@ public class ConfiguredResource implements Serializable {
     }
 
     @Inject
-    List<Config> configs;
+    List<ConfigInfo> configs;
 
     @GET
     @Path("/all")

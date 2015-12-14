@@ -11,7 +11,7 @@ class StandardConfigPoint extends ConfigPoint {
     }
 
     @Override
-    protected Class<?> type() {
+    public Class<?> type() {
         return getField().getType();
     }
 
