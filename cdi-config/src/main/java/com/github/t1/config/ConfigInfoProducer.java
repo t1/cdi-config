@@ -1,5 +1,6 @@
 package com.github.t1.config;
 
+import static com.github.t1.config.ConfigInfo.*;
 import static java.util.stream.Collectors.*;
 
 import java.io.StringReader;
@@ -10,8 +11,6 @@ import javax.inject.Inject;
 import javax.json.*;
 
 public class ConfigInfoProducer {
-    private static final JsonObject EMPTY_JSON_OBJECT = Json.createObjectBuilder().build();
-
     @Inject
     ConfigCdiExtension extension;
 
