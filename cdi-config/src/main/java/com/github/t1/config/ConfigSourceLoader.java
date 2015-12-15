@@ -37,7 +37,7 @@ public class ConfigSourceLoader {
         log.debug("load config source {}", uri);
         switch (uri.getScheme()) {
         case "java":
-            return insantiate(uri.getSchemeSpecificPart());
+            return instantiate(uri.getSchemeSpecificPart());
         case "classpath":
             uri = resolveClasspath(uri);
             // fall through:
@@ -47,10 +47,13 @@ public class ConfigSourceLoader {
         }
     }
 
-    @SneakyThrows(ReflectiveOperationException.class)
-    private ConfigSource insantiate(String className) {
-        Class<?> type = Class.forName(className);
-        return (ConfigSource) type.newInstance();
+    private ConfigSource instantiate(String className) {
+        try {
+            Class<?> type = Class.forName(className);
+            return (ConfigSource) type.newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("can't load java config source: " + className, e);
+        }
     }
 
     @SneakyThrows(URISyntaxException.class)

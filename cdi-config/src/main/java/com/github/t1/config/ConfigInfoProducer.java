@@ -1,6 +1,5 @@
 package com.github.t1.config;
 
-import static com.github.t1.config.ConfigInfo.*;
 import static java.util.stream.Collectors.*;
 
 import java.io.StringReader;
@@ -23,19 +22,51 @@ public class ConfigInfoProducer {
     }
 
     private ConfigInfo toConfigInfo(ConfigPoint configPoint) {
-        return ConfigInfo.builder()
-                .name(configPoint.name())
-                .description(configPoint.description())
-                .defaultValue(configPoint.defaultValue().orElse(null))
-                .value(configPoint.configValue().getValue())
-                .type(configPoint.type())
-                .container(configPoint.container())
-                .meta(toJson(configPoint.meta()))
-                .build();
+        return new ConfigInfo() {
+            @Override
+            public String getName() {
+                return configPoint.name();
+            }
+
+            @Override
+            public String getDescription() {
+                return configPoint.description();
+            }
+
+            @Override
+            public String getDefaultValue() {
+                return configPoint.defaultValue().orElse(null);
+            }
+
+            @Override
+            public Object getValue() {
+                return configPoint.configValue().getValue();
+            }
+
+            @Override
+            public Class<?> getType() {
+                return configPoint.type();
+            }
+
+            @Override
+            public Class<?> getContainer() {
+                return configPoint.container();
+            }
+
+            @Override
+            public JsonObject getMeta() {
+                return toJson(configPoint.meta());
+            }
+
+            @Override
+            public void updateTo(String value) {
+                // configPoint.set(configPoint, value);
+            }
+        };
     }
 
     public static JsonObject toJson(String meta) {
-        return (meta.isEmpty()) ? EMPTY_JSON_OBJECT
+        return (meta.isEmpty()) ? Json.createObjectBuilder().build()
                 : Json.createReader(new StringReader(meta.replace('\'', '\"'))).readObject();
     }
 }

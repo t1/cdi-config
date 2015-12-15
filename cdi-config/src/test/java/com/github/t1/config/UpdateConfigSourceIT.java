@@ -12,11 +12,9 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RunWith(Arquillian.class)
-public class UpdateConfigIT extends AbstractIT {
+public class UpdateConfigSourceIT extends AbstractIT {
     public static class UpdatingConfigSource implements ConfigSource {
         @Override
         public void configure(ConfigPoint configPoint) {
@@ -50,18 +48,6 @@ public class UpdateConfigIT extends AbstractIT {
     @Rule
     public TestLoggerRule logger = new TestLoggerRule();
 
-    private void waitForValue(String expectedValue, AtomicReference<String> ref) throws InterruptedException {
-        for (int i = 0; i < 40; i++) {
-            log.debug("wait {}", i);
-            Thread.sleep(50);
-
-            if (expectedValue.equals(ref.get())) {
-                return;
-            }
-        }
-        fail("expected value to change to " + expectedValue + ", but it's still " + ref.get());
-    }
-
     @Test
     public void shouldUpdateFromJavaClass() {
         assertEquals("initial-value", tbc.javaConfigString.get());
@@ -75,8 +61,8 @@ public class UpdateConfigIT extends AbstractIT {
     @Test
     public void shouldUpdateFromSystemProperty() throws Exception {
         String orig = System.getProperty("user.language");
+        assertEquals(orig, tbc.systemPropertyString.get());
         try {
-            assertEquals(orig, tbc.systemPropertyString.get());
             System.setProperty("user.language", "foo");
 
             waitForValue("foo", tbc.systemPropertyString);

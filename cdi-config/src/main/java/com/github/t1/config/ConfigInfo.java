@@ -1,38 +1,30 @@
 package com.github.t1.config;
 
-import static lombok.AccessLevel.*;
+import java.util.function.Predicate;
 
-import javax.json.*;
+import javax.json.JsonObject;
 
-import lombok.*;
+import lombok.NonNull;
 
-@Getter
-@ToString
-@Builder(toBuilder = true)
-@AllArgsConstructor(access = PRIVATE)
-public class ConfigInfo {
-    public static final JsonObject EMPTY_JSON_OBJECT = Json.createObjectBuilder().build();
-
-    public static ConfigInfoBuilder config(String name) {
-        return builder().name(name);
+public interface ConfigInfo {
+    public static Predicate<? super ConfigInfo> byName(String key) {
+        return config -> config.getName().equals(key);
     }
 
-    public static class ConfigInfoBuilder {
-        private JsonObject meta = EMPTY_JSON_OBJECT;
-    }
+    String getName();
+
+    String getDescription();
+
+    String getDefaultValue();
+
+    Object getValue();
+
+    Class<?> getType();
+
+    Class<?> getContainer();
 
     @NonNull
-    private final String name;
+    JsonObject getMeta();
 
-    private String description;
-    private String defaultValue;
-    private Object value;
-    private Class<?> type;
-    private Class<?> container;
-    @NonNull
-    private JsonObject meta;
-
-    public void updateTo(String value) {
-        this.value = value;
-    }
+    public void updateTo(String value);
 }

@@ -31,8 +31,7 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
 
         private String stringValue() {
             String key = configPoint().name();
-            String value = System.getProperty(key);
-            return value;
+            return System.getProperty(key);
         }
 
         @Override
