@@ -39,7 +39,6 @@ public class PropertiesFileConfigSource implements ConfigSource {
         }
     }
 
-    // TODO can I inline the Property class?
     private static class Property {
         private String value;
         private final List<PropertyConfigValue> configs = new ArrayList<>();

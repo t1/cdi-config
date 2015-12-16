@@ -52,14 +52,17 @@ public class ConfigAnnotationMatchingIT extends AbstractIT {
     }
 
     @Inject
-    List<Config> configs;
+    List<ConfigInfo> configs;
 
     @Test
     public void shouldProvideListOfConfigs() {
-        Config documented = configs.stream().filter(config -> config.name().equals("documented")).findAny().get();
+        ConfigInfo documented = configs.stream()
+                .filter(config -> config.getName().equals("documented"))
+                .findAny()
+                .get();
 
-        assertThat(documented.name()).isEqualTo("documented");
-        assertThat(documented.description()).isEqualTo("desc");
-        assertThat(documented.defaultValue()).isEqualTo("fallback");
+        assertThat(documented.getName()).isEqualTo("documented");
+        assertThat(documented.getDescription()).isEqualTo("desc");
+        assertThat(documented.getDefaultValue()).isEqualTo("fallback");
     }
 }
