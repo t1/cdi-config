@@ -13,6 +13,8 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.junit.*;
 import org.junit.runner.RunWith;
 
+import com.github.t1.testtools.TestLoggerRule;
+
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,9 +1,9 @@
 package com.github.t1.config;
 
 import static com.github.t1.config.ConfigInfo.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
+import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -13,6 +13,8 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.junit.*;
 import org.junit.runner.RunWith;
 
+import com.github.t1.testtools.*;
+
 @RunWith(Arquillian.class)
 public class UpdateConfigInfoIT extends AbstractIT {
     private static final String USER_LANGUAGE = "user.language";
@@ -20,54 +22,69 @@ public class UpdateConfigInfoIT extends AbstractIT {
     static class ToBeConfigured {
         @Config(name = USER_LANGUAGE)
         private AtomicReference<String> userLanguage;
+        @Config(name = USER_LANGUAGE)
+        private AtomicReference<String> secondUserLanguage;
+        @Config(name = "alt-string")
+        private AtomicReference<String> altString;
+        @Config(name = "alt-string")
+        private AtomicReference<String> secondAltString;
     }
 
     @Inject
     ToBeConfigured target;
-
     @Inject
     List<ConfigInfo> configs;
 
     @Rule
     public TestLoggerRule logger = new TestLoggerRule();
+    @Rule
+    public SystemPropertiesRule systemProperties = new SystemPropertiesRule();
+    @Rule
+    public FileMemento fileMemento = new FileMemento("target/test-classes/configuration-alt.properties");
 
-    private ConfigInfo userLanguageConfig() throws AssertionError {
-        return configs.stream()
-                .filter(byName(USER_LANGUAGE))
+    ConfigInfo userLanguage;
+    ConfigInfo altString;
+
+    @Before
+    public void before() {
+        this.userLanguage = config(USER_LANGUAGE);
+        this.altString = config("alt-string");
+    }
+
+    private ConfigInfo config(String name) throws AssertionError {
+        ConfigInfo config = configs.stream()
+                .filter(byName(name))
                 .findAny()
-                .orElseThrow(() -> new AssertionError("expected to find a config " + USER_LANGUAGE));
+                .orElseThrow(() -> new AssertionError("expected to find a config " + name));
+        assertThat(config.isUpdatable()).as(name + " is updatable").isTrue();
+        return config;
     }
 
     @Test
     public void shouldUpdateSystemPropertyFromConfigInfo() throws Exception {
-        ConfigInfo userLanguage = userLanguageConfig();
-        assertThat(userLanguage.isUpdatable()).isTrue();
+        systemProperties.given(USER_LANGUAGE, "bar");
 
-        String orig = System.getProperty(USER_LANGUAGE);
-        assertEquals(orig, target.userLanguage.get());
-        try {
-            userLanguage.updateTo("foo");
+        userLanguage.updateTo("foo");
 
-            waitForValue("foo", target.userLanguage);
-        } finally {
-            System.setProperty(USER_LANGUAGE, orig);
-        }
+        waitForValue("foo", target.userLanguage);
+        assertThat(target.secondUserLanguage.get()).isEqualTo("foo");
     }
 
     @Test
-    public void shouldUpdateConfigInfoFromSystemProperty() throws Exception {
-        ConfigInfo userLanguage = userLanguageConfig();
+    public void shouldUpdateConfigInfoFromSystemProperty() {
+        assertThat(userLanguage.getValue()).isNotEqualTo("foo");
 
-        String orig = System.getProperty(USER_LANGUAGE);
-        assertEquals(orig, target.userLanguage.get());
-        try {
-            System.setProperty("user.language", "foo");
+        systemProperties.given(USER_LANGUAGE, "foo");
 
-            waitForValue("foo", target.userLanguage);
+        assertThat(userLanguage.getValue()).isEqualTo("foo");
+    }
 
-            assertThat(userLanguage.getValue()).isEqualTo("foo");
-        } finally {
-            System.setProperty(USER_LANGUAGE, orig);
-        }
+    @Test
+    public void shouldUpdatePropertiesFileFromConfigInfo() throws Exception {
+        altString.updateTo("alt-value2");
+
+        assertThat(Files.readAllLines(fileMemento.getPath())).contains("alt-string=alt-value2");
+        assertThat(target.altString.get()).isEqualTo("alt-value2");
+        assertThat(target.secondAltString.get()).isEqualTo("alt-value2");
     }
 }

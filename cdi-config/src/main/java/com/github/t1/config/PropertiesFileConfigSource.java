@@ -18,7 +18,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
 
         @Override
         protected Object getValue() {
-            Property property = getProperty(configPoint());
+            Property property = properties.get(configPoint().name());
             String value = (property == null) ? null : property.value;
             return convert(value);
         }
@@ -27,8 +27,19 @@ public class PropertiesFileConfigSource implements ConfigSource {
         public String toString() {
             return super.toString() + " from " + uri;
         }
+
+        @Override
+        public boolean isWritable() {
+            return PropertiesFileConfigSource.this.isWritable();
+        }
+
+        @Override
+        public void writeValue(String value) {
+            PropertiesFileConfigSource.this.write(configPoint().name(), value);
+        }
     }
 
+    // TODO can I inline the Property class?
     private static class Property {
         private String value;
         private final List<PropertyConfigValue> configs = new ArrayList<>();
@@ -88,8 +99,36 @@ public class PropertiesFileConfigSource implements ConfigSource {
         return uri;
     }
 
+    public boolean isWritable() {
+        return isFileScheme(uri) && Files.isWritable(path());
+    }
+
     private boolean isFileScheme(URI uri) {
         return "file".equals(uri.getScheme());
+    }
+
+    private Path path() {
+        return Paths.get(uri);
+    }
+
+    public void write(String name, String value) {
+        properties.get(name).updateValue(value);
+        save();
+    }
+
+    private void save() {
+        Properties result = toProperties(this.properties);
+        try {
+            result.store(Files.newBufferedWriter(path()), null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Properties toProperties(Map<String, Property> map) {
+        Properties result = new Properties();
+        map.forEach((key, value) -> result.put(key, value.value));
+        return result;
     }
 
     private static Path subpath(Path path, int beginIndex) {
@@ -126,7 +165,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
 
     private void initMonitor() {
         if (isFileScheme(uri)) {
-            FILE_MONITOR.add(Paths.get(uri), new Runnable() {
+            FILE_MONITOR.add(path(), new Runnable() {
                 @Override
                 public void run() {
                     log.debug("{} changed", uri);
@@ -155,16 +194,12 @@ public class PropertiesFileConfigSource implements ConfigSource {
 
     @Override
     public void configure(ConfigPoint configPoint) {
-        Property property = getProperty(configPoint);
+        Property property = properties.get(configPoint.name());
         if (property == null)
             return;
         PropertyConfigValue configValue = new PropertyConfigValue(configPoint);
         property.add(configValue);
         configPoint.configValue(configValue);
-    }
-
-    private Property getProperty(ConfigPoint configPoint) {
-        return properties.get(configPoint.name());
     }
 
     @Override
@@ -184,7 +219,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
     @Override
     public void shutdown() {
         if (isFileScheme(uri)) {
-            FILE_MONITOR.remove(Paths.get(uri));
+            FILE_MONITOR.remove(path());
         }
     }
 }

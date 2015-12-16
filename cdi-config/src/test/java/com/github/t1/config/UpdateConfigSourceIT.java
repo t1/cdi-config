@@ -2,7 +2,6 @@ package com.github.t1.config;
 
 import static org.junit.Assert.*;
 
-import java.nio.file.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -10,6 +9,8 @@ import javax.inject.Inject;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.*;
 import org.junit.runner.RunWith;
+
+import com.github.t1.testtools.*;
 
 import lombok.ToString;
 
@@ -25,10 +26,6 @@ public class UpdateConfigSourceIT extends AbstractIT {
             }
         }
     }
-
-    private static final Path PATH = Paths.get("target/test-classes/configuration-alt.properties");
-    private static final String CONFIG1 = "alt-string=alt-value\n";
-    private static final String CONFIG2 = "alt-string=alt-value2\n";
 
     private static InMemoryConfigValue configValue;
 
@@ -47,41 +44,37 @@ public class UpdateConfigSourceIT extends AbstractIT {
 
     @Rule
     public TestLoggerRule logger = new TestLoggerRule();
+    @Rule
+    public SystemPropertiesRule systemProperties = new SystemPropertiesRule();
+    @Rule
+    public FileMemento fileMemento = new FileMemento("target/test-classes/configuration-alt.properties");
 
     @Test
     public void shouldUpdateFromJavaClass() {
         assertEquals("initial-value", tbc.javaConfigString.get());
-        assertEquals(CONFIG1, readFile(PATH));
 
         configValue.writeValue("updated-value");
 
         assertEquals("updated-value", tbc.javaConfigString.get());
+        configValue.writeValue("initial-value");
     }
 
     @Test
     public void shouldUpdateFromSystemProperty() throws Exception {
         String orig = System.getProperty("user.language");
         assertEquals(orig, tbc.systemPropertyString.get());
-        try {
-            System.setProperty("user.language", "foo");
 
-            waitForValue("foo", tbc.systemPropertyString);
-        } finally {
-            System.setProperty("user.language", orig);
-        }
+        systemProperties.given("user.language", "foo");
+
+        waitForValue("foo", tbc.systemPropertyString);
     }
 
     @Test
     public void shouldUpdateFromFileChange() throws Exception {
         assertEquals("alt-value", tbc.altString.get());
-        assertEquals(CONFIG1, readFile(PATH));
 
-        try {
-            Files.write(PATH, CONFIG2.getBytes());
+        fileMemento.write("alt-string=alt-value2\n");
 
-            waitForValue("alt-value2", tbc.altString);
-        } finally {
-            Files.write(PATH, CONFIG1.getBytes());
-        }
+        waitForValue("alt-value2", tbc.altString);
     }
 }

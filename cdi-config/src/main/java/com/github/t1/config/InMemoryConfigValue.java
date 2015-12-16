@@ -14,8 +14,8 @@ public class InMemoryConfigValue extends UpdatableConfigValue {
     private Object value;
 
     @Override
-    public void writeValue(Object value) {
-        this.value = value;
+    public void writeValue(String value) {
+        this.value = convert(value);
         updateAllConfigTargets();
     }
 

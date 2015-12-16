@@ -85,11 +85,7 @@ public abstract class ConfigPoint {
             return false;
         }
 
-        public void writeValue(String value) {
-            writeValue(convert(value));
-        }
-
-        protected void writeValue(@SuppressWarnings("unused") Object value) {
+        public void writeValue(@SuppressWarnings("unused") String value) {
             throw new UnsupportedOperationException("can't write a " + getClass().getName());
         }
     }
