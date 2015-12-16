@@ -24,9 +24,11 @@ public class UpdateConfigInfoIT extends AbstractIT {
         private AtomicReference<String> userLanguage;
         @Config(name = USER_LANGUAGE)
         private AtomicReference<String> secondUserLanguage;
-        @Config(name = "alt-string")
+        @Config(name = "alt-string", defaultValue = "default-value", description = "alt-string-description",
+                meta = "{'meta-key':'meta-value'}")
         private AtomicReference<String> altString;
-        @Config(name = "alt-string")
+        @Config(name = "alt-string", defaultValue = "default-value", description = "alt-string-description",
+                meta = "{'meta-key':'meta-value'}")
         private AtomicReference<String> secondAltString;
     }
 
@@ -58,6 +60,26 @@ public class UpdateConfigInfoIT extends AbstractIT {
                 .orElseThrow(() -> new AssertionError("expected to find a config " + name));
         assertThat(config.isUpdatable()).as(name + " is updatable").isTrue();
         return config;
+    }
+
+    @Test
+    public void shouldHaveToString() {
+        assertThat(userLanguage.toString()).isEqualTo("ConfigInfo[user.language, "
+                + "value='" + System.getProperty(USER_LANGUAGE) + "', "
+                + "type=java.lang.String, "
+                + "container=" + ToBeConfigured.class.getName() + ", "
+                + "updatable=true"
+                + "]");
+        assertThat(altString.toString()).isEqualTo(
+                "ConfigInfo[alt-string, "
+                        + "description='alt-string-description', "
+                        + "defaultValue='default-value', "
+                        + "value='alt-value', "
+                        + "type=java.lang.String, "
+                        + "container=" + ToBeConfigured.class.getName() + ", "
+                        + "meta={'meta-key':'meta-value'}, "
+                        + "updatable=true"
+                        + "]");
     }
 
     @Test

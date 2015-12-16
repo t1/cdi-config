@@ -67,6 +67,24 @@ public class ConfigInfoProducer {
             public void updateTo(String value) {
                 configPoint.writeValue(value);
             }
+
+            @Override
+            public String toString() {
+                return "ConfigInfo["
+                        + getName()
+                        + ((isEmpty(getDescription())) ? "" : ", description='" + getDescription() + "'")
+                        + ((isEmpty(getDefaultValue())) ? "" : ", defaultValue='" + getDefaultValue() + "'")
+                        + (", value='" + getValue() + "'")
+                        + (", type=" + getType().getName())
+                        + (", container=" + getContainer().getName())
+                        + ((getMeta().isEmpty()) ? "" : ", meta=" + getMeta().toString().replace('\"', '\''))
+                        + (", updatable=" + isUpdatable())
+                        + "]";
+            }
+
+            private boolean isEmpty(String string) {
+                return string == null || string.isEmpty();
+            }
         };
     }
 
