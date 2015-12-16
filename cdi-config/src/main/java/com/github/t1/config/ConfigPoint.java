@@ -80,6 +80,18 @@ public abstract class ConfigPoint {
         public String toString() {
             return "config value for '" + configPoint().name() + "'";
         }
+
+        public boolean isWritable() {
+            return false;
+        }
+
+        public void writeValue(String value) {
+            writeValue(convert(value));
+        }
+
+        protected void writeValue(@SuppressWarnings("unused") Object value) {
+            throw new UnsupportedOperationException("can't write a " + getClass().getName());
+        }
     }
 
     public abstract class UpdatableConfigValue extends ConfigValue {
@@ -158,6 +170,18 @@ public abstract class ConfigPoint {
     public void configValue(ConfigValue configValue) {
         this.configValue = configValue;
         log.debug("configure {}", this);
+    }
+
+    public Object getValue() {
+        return configValue().getValue();
+    }
+
+    public boolean isWritable() {
+        return configValue().isWritable();
+    }
+
+    public void writeValue(String value) {
+        configValue().writeValue(value);
     }
 
     public boolean isConfigured() {

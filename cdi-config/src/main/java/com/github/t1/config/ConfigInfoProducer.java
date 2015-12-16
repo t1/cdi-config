@@ -40,7 +40,7 @@ public class ConfigInfoProducer {
 
             @Override
             public Object getValue() {
-                return configPoint.configValue().getValue();
+                return configPoint.getValue();
             }
 
             @Override
@@ -59,8 +59,13 @@ public class ConfigInfoProducer {
             }
 
             @Override
+            public boolean isUpdatable() {
+                return configPoint.isWritable();
+            }
+
+            @Override
             public void updateTo(String value) {
-                // configPoint.set(configPoint, value);
+                configPoint.writeValue(value);
             }
         };
     }

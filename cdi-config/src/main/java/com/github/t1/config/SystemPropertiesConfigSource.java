@@ -5,11 +5,11 @@ import static java.util.concurrent.TimeUnit.*;
 import java.util.Objects;
 import java.util.concurrent.*;
 
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-
 import com.github.t1.config.ConfigPoint.UpdatableConfigValue;
 import com.github.t1.config.SystemPropertiesConfigSource.SystemPropertiesConfigValue;
+
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class SystemPropertiesConfigSource extends MapConfigSource<SystemPropertiesConfigValue> {
@@ -43,6 +43,17 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
             if (!Objects.equals(lastStringValue, stringValue())) {
                 updateAllConfigTargets();
             }
+        }
+
+        @Override
+        public boolean isWritable() {
+            return true;
+        }
+
+        @Override
+        public void writeValue(String value) {
+            String key = configPoint().name();
+            System.setProperty(key, value);
         }
     }
 

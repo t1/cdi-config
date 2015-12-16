@@ -39,9 +39,9 @@ public class UpdateConfigInfoIT extends AbstractIT {
     }
 
     @Test
-    @Ignore
     public void shouldUpdateSystemPropertyFromConfigInfo() throws Exception {
         ConfigInfo userLanguage = userLanguageConfig();
+        assertThat(userLanguage.isUpdatable()).isTrue();
 
         String orig = System.getProperty(USER_LANGUAGE);
         assertEquals(orig, target.userLanguage.get());

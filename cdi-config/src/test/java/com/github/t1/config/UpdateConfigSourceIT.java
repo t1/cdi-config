@@ -20,7 +20,7 @@ public class UpdateConfigSourceIT extends AbstractIT {
         public void configure(ConfigPoint configPoint) {
             if ("java-config-string".equals(configPoint.name())) {
                 assertNull(configValue);
-                configValue = new SimpleUpdatableConfigValue(configPoint, "initial-value");
+                configValue = new InMemoryConfigValue(configPoint, "initial-value");
                 configPoint.configValue(configValue);
             }
         }
@@ -30,7 +30,7 @@ public class UpdateConfigSourceIT extends AbstractIT {
     private static final String CONFIG1 = "alt-string=alt-value\n";
     private static final String CONFIG2 = "alt-string=alt-value2\n";
 
-    private static SimpleUpdatableConfigValue configValue;
+    private static InMemoryConfigValue configValue;
 
     @ToString
     static class ToBeConfigured {
@@ -53,7 +53,7 @@ public class UpdateConfigSourceIT extends AbstractIT {
         assertEquals("initial-value", tbc.javaConfigString.get());
         assertEquals(CONFIG1, readFile(PATH));
 
-        configValue.setValue("updated-value");
+        configValue.writeValue("updated-value");
 
         assertEquals("updated-value", tbc.javaConfigString.get());
     }

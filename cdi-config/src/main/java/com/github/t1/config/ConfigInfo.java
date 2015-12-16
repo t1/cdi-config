@@ -26,5 +26,7 @@ public interface ConfigInfo {
     @NonNull
     JsonObject getMeta();
 
+    public boolean isUpdatable();
+
     public void updateTo(String value);
 }
