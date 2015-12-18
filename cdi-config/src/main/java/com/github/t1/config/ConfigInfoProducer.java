@@ -65,7 +65,19 @@ public class ConfigInfoProducer {
 
             @Override
             public void updateTo(String value) {
+                if (value == null)
+                    value = nullValue(getType());
                 configPoint.writeValue(value);
+            }
+
+            private String nullValue(Class<?> type) {
+                if (type == boolean.class)
+                    return "false";
+                if (type == char.class)
+                    return "\0";
+                if (type.isPrimitive()) // all numeric types (void can't happen)
+                    return "0";
+                return null;
             }
 
             @Override
