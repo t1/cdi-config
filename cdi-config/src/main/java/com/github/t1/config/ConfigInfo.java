@@ -7,7 +7,7 @@ import javax.json.JsonObject;
 import lombok.NonNull;
 
 public interface ConfigInfo {
-    public static Predicate<? super ConfigInfo> byName(String key) {
+    public static Predicate<? super ConfigInfo> withName(String key) {
         return config -> config.getName().equals(key);
     }
 

@@ -55,7 +55,7 @@ public class UpdateConfigInfoIT extends AbstractIT {
 
     private ConfigInfo config(String name) throws AssertionError {
         ConfigInfo config = configs.stream()
-                .filter(byName(name))
+                .filter(withName(name))
                 .findAny()
                 .orElseThrow(() -> new AssertionError("expected to find a config " + name));
         assertThat(config.isUpdatable()).as(name + " is updatable").isTrue();
@@ -63,23 +63,22 @@ public class UpdateConfigInfoIT extends AbstractIT {
     }
 
     @Test
-    public void shouldHaveToString() {
+    public void shouldHaveNiceToString() {
         assertThat(userLanguage.toString()).isEqualTo("ConfigInfo[user.language, "
                 + "value='" + System.getProperty(USER_LANGUAGE) + "', "
                 + "type=java.lang.String, "
                 + "container=" + ToBeConfigured.class.getName() + ", "
                 + "updatable=true"
                 + "]");
-        assertThat(altString.toString()).isEqualTo(
-                "ConfigInfo[alt-string, "
-                        + "description='alt-string-description', "
-                        + "defaultValue='default-value', "
-                        + "value='alt-value', "
-                        + "type=java.lang.String, "
-                        + "container=" + ToBeConfigured.class.getName() + ", "
-                        + "meta={'meta-key':'meta-value'}, "
-                        + "updatable=true"
-                        + "]");
+        assertThat(altString.toString()).isEqualTo("ConfigInfo[alt-string, "
+                + "description='alt-string-description', "
+                + "defaultValue='default-value', "
+                + "value='alt-value', "
+                + "type=java.lang.String, "
+                + "container=" + ToBeConfigured.class.getName() + ", "
+                + "meta={'meta-key':'meta-value'}, "
+                + "updatable=true"
+                + "]");
     }
 
     @Test
