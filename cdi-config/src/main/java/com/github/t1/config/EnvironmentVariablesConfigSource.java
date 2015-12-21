@@ -1,9 +1,8 @@
 package com.github.t1.config;
 
 import com.github.t1.config.ConfigPoint.ConfigValue;
-import com.github.t1.config.EnvironmentVariablesConfigSource.EnvironmentVariableConfigValue;
 
-public class EnvironmentVariablesConfigSource extends MapConfigSource<EnvironmentVariableConfigValue> {
+public class EnvironmentVariablesConfigSource implements ConfigSource {
     class EnvironmentVariableConfigValue extends ConfigValue {
         public EnvironmentVariableConfigValue(String name, ConfigPoint configPoint) {
             configPoint.super(name);
@@ -26,7 +25,10 @@ public class EnvironmentVariablesConfigSource extends MapConfigSource<Environmen
     }
 
     @Override
-    protected EnvironmentVariableConfigValue createConfigValueFor(ConfigPoint configPoint) {
-        return new EnvironmentVariableConfigValue(configPoint.name(), configPoint);
+    public void configure(ConfigPoint configPoint) {
+        ConfigValue configValue = new EnvironmentVariableConfigValue(configPoint.name(), configPoint);
+        if (configValue.getValue(configPoint.type()) == null)
+            return;
+        configPoint.configValue(configValue);
     }
 }

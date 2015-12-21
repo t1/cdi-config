@@ -2,17 +2,16 @@ package com.github.t1.config;
 
 import static java.util.concurrent.TimeUnit.*;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 
 import com.github.t1.config.ConfigPoint.UpdatableConfigValue;
-import com.github.t1.config.SystemPropertiesConfigSource.SystemPropertiesConfigValue;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SystemPropertiesConfigSource extends MapConfigSource<SystemPropertiesConfigValue> {
+public class SystemPropertiesConfigSource implements ConfigSource {
     private static int nextInstance = 0;
 
     class SystemPropertiesConfigValue extends UpdatableConfigValue {
@@ -53,16 +52,11 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
             System.setProperty(getName(), value);
             // FIXME super.updateAllConfigTargets();
         }
-
-        @Override
-        public synchronized void updateAllConfigTargets() {
-            if (hasChanged())
-                super.updateAllConfigTargets();
-        }
     }
 
     private final int instance = nextInstance++;
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private List<SystemPropertiesConfigValue> mapValues = new ArrayList<>();
 
     public SystemPropertiesConfigSource() {
         log.debug("start executor service {}", instance);
@@ -83,7 +77,7 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
             }
 
             private void checkSystemPropertyChanges() {
-                for (SystemPropertiesConfigValue watcher : mapValues())
+                for (SystemPropertiesConfigValue watcher : mapValues)
                     if (watcher.hasChanged())
                         watcher.updateAllConfigTargets();
             }
@@ -99,8 +93,16 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
         log.debug("executor service {} is terminated", instance);
     }
 
-    @Override
     protected SystemPropertiesConfigValue createConfigValueFor(ConfigPoint configPoint) {
         return new SystemPropertiesConfigValue(configPoint.name(), configPoint);
+    }
+
+    @Override
+    public void configure(ConfigPoint configPoint) {
+        SystemPropertiesConfigValue configValue = new SystemPropertiesConfigValue(configPoint.name(), configPoint);
+        if (configValue.getValue(configPoint.type()) == null)
+            return;
+        mapValues.add(configValue);
+        configPoint.configValue(configValue);
     }
 }
