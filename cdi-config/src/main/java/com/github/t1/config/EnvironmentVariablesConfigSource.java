@@ -5,29 +5,28 @@ import com.github.t1.config.EnvironmentVariablesConfigSource.EnvironmentVariable
 
 public class EnvironmentVariablesConfigSource extends MapConfigSource<EnvironmentVariableConfigValue> {
     class EnvironmentVariableConfigValue extends ConfigValue {
-        public EnvironmentVariableConfigValue(ConfigPoint configPoint) {
-            configPoint.super();
+        public EnvironmentVariableConfigValue(String name, ConfigPoint configPoint) {
+            configPoint.super(name);
         }
 
         @Override
-        public Object getValue() {
+        public <T> T getValue(Class<T> type) {
             String value = stringValue();
-            return convert(value);
+            return convert(value, type);
         }
 
         private String stringValue() {
-            String key = configPoint().name();
-            return System.getenv(key);
+            return System.getenv(getName());
         }
 
         @Override
         public String toString() {
-            return super.toString() + " from environment variable";
+            return "environment variable " + getName();
         }
     }
 
     @Override
     protected EnvironmentVariableConfigValue createConfigValueFor(ConfigPoint configPoint) {
-        return new EnvironmentVariableConfigValue(configPoint);
+        return new EnvironmentVariableConfigValue(configPoint.name(), configPoint);
     }
 }

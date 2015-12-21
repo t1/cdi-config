@@ -119,7 +119,7 @@ public class UpdateConfigInfoIT extends AbstractIT {
         userLanguage.updateTo("foo");
 
         waitForValue("foo", target.userLanguage);
-        assertThat(target.secondUserLanguage.get()).isEqualTo("foo");
+        assertThat(target.secondUserLanguage.get()).as("second user language").isEqualTo("foo");
     }
 
     @Test

@@ -12,20 +12,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PropertiesFileConfigSource implements ConfigSource {
     private class PropertyConfigValue extends UpdatableConfigValue {
-        public PropertyConfigValue(ConfigPoint configPoint) {
-            configPoint.super();
+        public PropertyConfigValue(String name, ConfigPoint configPoint) {
+            configPoint.super(name);
         }
 
         @Override
-        protected Object getValue() {
-            Property property = properties.get(configPoint().name());
+        protected <T> T getValue(Class<T> type) {
+            Property property = properties.get(getName());
             String value = (property == null) ? null : property.value;
-            return convert(value);
+            return convert(value, type);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " from " + uri;
+            return "property " + getName() + " from " + uri;
         }
 
         @Override
@@ -35,7 +35,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
 
         @Override
         public void writeValue(String value) {
-            PropertiesFileConfigSource.this.write(configPoint().name(), value);
+            PropertiesFileConfigSource.this.write(getName(), value);
         }
     }
 
@@ -55,10 +55,8 @@ public class PropertiesFileConfigSource implements ConfigSource {
             if (value.equals(newValue))
                 return false;
             value = newValue;
-            for (PropertyConfigValue config : configs) {
-                log.debug("update {}", config.configPoint());
+            for (PropertyConfigValue config : configs)
                 config.updateAllConfigTargets();
-            }
             return true;
         }
     }
@@ -193,10 +191,11 @@ public class PropertiesFileConfigSource implements ConfigSource {
 
     @Override
     public void configure(ConfigPoint configPoint) {
-        Property property = properties.get(configPoint.name());
+        String name = configPoint.name();
+        Property property = properties.get(name);
         if (property == null)
             return;
-        PropertyConfigValue configValue = new PropertyConfigValue(configPoint);
+        PropertyConfigValue configValue = new PropertyConfigValue(name, configPoint);
         property.add(configValue);
         configPoint.configValue(configValue);
     }

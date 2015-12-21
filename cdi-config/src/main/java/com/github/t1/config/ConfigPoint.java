@@ -50,12 +50,15 @@ public abstract class ConfigPoint {
 
     @RequiredArgsConstructor
     public abstract class ConfigValue {
+        @Getter
+        private final String name;
+
         protected ConfigPoint configPoint() {
             return ConfigPoint.this;
         }
 
-        protected Object convert(String value) {
-            return STRING_CONVERT.convertFromString(configPoint().type(), resolve(value));
+        protected <T> T convert(String value, Class<T> type) {
+            return STRING_CONVERT.convertFromString(type, resolve(value));
         }
 
         private String resolve(String value) {
@@ -64,22 +67,13 @@ public abstract class ConfigPoint {
             return resolveExpressions(value);
         }
 
-        public void addConfigTartet(Object target) {
-            configPoint().set(target, getValue());
+        public void addConfigTarget(Object target) {
+            configPoint().set(target, getValue(configPoint().type()));
         }
 
-        protected abstract Object getValue();
+        protected abstract <T> T getValue(Class<T> type);
 
-        public void removeConfigTartet(@SuppressWarnings("unused") Object target) {}
-
-        /**
-         * Do <em>not</em> produce the actual value... could be, e.g., a password. <br/>
-         * And take care to not recurse into {@link ConfigPoint#toString()}
-         */
-        @Override
-        public String toString() {
-            return "config value for '" + configPoint().name() + "'";
-        }
+        public void removeConfigTarget(@SuppressWarnings("unused") Object target) {}
 
         public boolean isWritable() {
             return false;
@@ -93,19 +87,23 @@ public abstract class ConfigPoint {
     public abstract class UpdatableConfigValue extends ConfigValue {
         private final List<Object> targets = new ArrayList<>();
 
-        @Override
-        public void addConfigTartet(Object target) {
-            this.targets.add(target);
-            configPoint().set(target, getValue());
+        public UpdatableConfigValue(String name) {
+            super(name);
         }
 
         @Override
-        public void removeConfigTartet(Object target) {
+        public void addConfigTarget(Object target) {
+            this.targets.add(target);
+            configPoint().set(target, getValue(configPoint().type()));
+        }
+
+        @Override
+        public void removeConfigTarget(Object target) {
             targets.remove(target);
         }
 
         public void updateAllConfigTargets() {
-            Object value = getValue();
+            Object value = getValue(configPoint().type());
             for (Object target : targets) {
                 configPoint().set(target, value);
             }
@@ -169,7 +167,7 @@ public abstract class ConfigPoint {
     }
 
     public Object getValue() {
-        return configValue().getValue();
+        return configValue().getValue(type());
     }
 
     public boolean isWritable() {
@@ -202,11 +200,11 @@ public abstract class ConfigPoint {
     }
 
     public void addConfigTarget(Object target) {
-        configValue.addConfigTartet(target);
+        configValue.addConfigTarget(target);
     }
 
     public void removeConfigTarget(Object target) {
-        configValue.removeConfigTartet(target);
+        configValue.removeConfigTarget(target);
     }
 
     public abstract void set(Object target, Object value);

@@ -16,33 +16,30 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
     private static int nextInstance = 0;
 
     class SystemPropertiesConfigValue extends UpdatableConfigValue {
-        private final String lastStringValue;
+        private String lastStringValue;
 
-        public SystemPropertiesConfigValue(ConfigPoint configPoint) {
-            configPoint.super();
+        public SystemPropertiesConfigValue(String name, ConfigPoint configPoint) {
+            configPoint.super(name);
             this.lastStringValue = stringValue();
         }
 
         @Override
-        protected Object getValue() {
+        protected <T> T getValue(Class<T> type) {
             String value = stringValue();
-            return convert(value);
+            return convert(value, type);
         }
 
         private String stringValue() {
-            String key = configPoint().name();
-            return System.getProperty(key);
+            return System.getProperty(getName());
         }
 
         @Override
         public String toString() {
-            return super.toString() + " from system properties";
+            return "system property " + getName();
         }
 
-        public void checkForUpdate() {
-            if (!Objects.equals(lastStringValue, stringValue())) {
-                updateAllConfigTargets();
-            }
+        public boolean hasChanged() {
+            return !Objects.equals(lastStringValue, stringValue());
         }
 
         @Override
@@ -51,9 +48,16 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
         }
 
         @Override
-        public void writeValue(String value) {
-            String key = configPoint().name();
-            System.setProperty(key, value);
+        public synchronized void writeValue(String value) {
+            // FIXME this.lastStringValue = value;
+            System.setProperty(getName(), value);
+            // FIXME super.updateAllConfigTargets();
+        }
+
+        @Override
+        public synchronized void updateAllConfigTargets() {
+            if (hasChanged())
+                super.updateAllConfigTargets();
         }
     }
 
@@ -67,11 +71,21 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
 
             @Override
             public void run() {
-                log.trace("run {}-{}", instance, count++);
-
-                for (SystemPropertiesConfigValue watcher : mapValues()) {
-                    watcher.checkForUpdate();
+                Thread currentThread = Thread.currentThread();
+                String origThreadName = currentThread.getName();
+                try {
+                    currentThread.setName("system-property-update-checker-" + instance);
+                    log.trace("run {}-{}", instance, count++);
+                    checkSystemPropertyChanges();
+                } finally {
+                    currentThread.setName(origThreadName);
                 }
+            }
+
+            private void checkSystemPropertyChanges() {
+                for (SystemPropertiesConfigValue watcher : mapValues())
+                    if (watcher.hasChanged())
+                        watcher.updateAllConfigTargets();
             }
         }, 0, 1, SECONDS);
     }
@@ -87,6 +101,6 @@ public class SystemPropertiesConfigSource extends MapConfigSource<SystemProperti
 
     @Override
     protected SystemPropertiesConfigValue createConfigValueFor(ConfigPoint configPoint) {
-        return new SystemPropertiesConfigValue(configPoint);
+        return new SystemPropertiesConfigValue(configPoint.name(), configPoint);
     }
 }

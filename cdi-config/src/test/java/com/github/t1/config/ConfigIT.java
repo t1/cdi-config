@@ -36,7 +36,7 @@ public class ConfigIT extends AbstractIT {
         @Config
         String string;
 
-        @Config
+        @Config(name = "int")
         int i;
 
         @Config
@@ -99,7 +99,7 @@ public class ConfigIT extends AbstractIT {
 
     @Test
     public void shouldConfigureInt() {
-        assertEquals(123, tbc.i);
+        assertEquals(12345, tbc.i);
     }
 
     @Test

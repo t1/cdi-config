@@ -14,7 +14,7 @@ public abstract class MapConfigSource<T extends ConfigValue> implements ConfigSo
     @Override
     public void configure(ConfigPoint configPoint) {
         T configValue = configValueFor(configPoint);
-        if (configValue.getValue() != null) {
+        if (configValue.getValue(configPoint.type()) != null) {
             configPoint.configValue(configValue);
         }
     }
