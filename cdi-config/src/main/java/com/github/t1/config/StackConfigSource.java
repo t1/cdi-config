@@ -2,25 +2,25 @@ package com.github.t1.config;
 
 import java.util.*;
 
-class MultiConfigSource implements ConfigSource {
+class StackConfigSource implements ConfigSource {
     public static ConfigSource of(ConfigSource... sources) {
         List<ConfigSource> sourceList = new ArrayList<>(Arrays.asList(sources));
 
-        MultiConfigSource multi = (sourceList.get(0) instanceof MultiConfigSource) //
-                ? (MultiConfigSource) sourceList.remove(0) //
-                : new MultiConfigSource();
+        StackConfigSource stack = (sourceList.get(0) instanceof StackConfigSource) //
+                ? (StackConfigSource) sourceList.remove(0) //
+                : new StackConfigSource();
 
         for (ConfigSource source : sourceList)
-            multi.add(source);
-        return multi;
+            stack.add(source);
+        return stack;
     }
 
     private final List<ConfigSource> sources = new ArrayList<>();
 
     private void add(ConfigSource source) {
-        if (source instanceof MultiConfigSource) {
-            MultiConfigSource subMulti = (MultiConfigSource) source;
-            this.sources.addAll(subMulti.sources);
+        if (source instanceof StackConfigSource) {
+            StackConfigSource subStack = (StackConfigSource) source;
+            this.sources.addAll(subStack.sources);
         } else {
             this.sources.add(source);
         }
@@ -37,7 +37,7 @@ class MultiConfigSource implements ConfigSource {
 
     @Override
     public String toString() {
-        return "multi:" + sources;
+        return "stack:" + sources;
     }
 
     @Override

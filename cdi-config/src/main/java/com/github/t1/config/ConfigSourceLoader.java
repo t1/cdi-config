@@ -26,7 +26,7 @@ public class ConfigSourceLoader {
     }
 
     public ConfigSource load() {
-        return MultiConfigSource.of( //
+        return StackConfigSource.of( //
                 new SystemPropertiesConfigSource(), //
                 new EnvironmentVariablesConfigSource(), //
                 loadConfigSource(uri), //
@@ -76,7 +76,7 @@ public class ConfigSourceLoader {
                 value = resolveExpressions(value);
                 URI importUri = URI.create(value);
                 ConfigSource resolvedSource = loadConfigSource(importUri);
-                result = MultiConfigSource.of(result, resolvedSource);
+                result = StackConfigSource.of(result, resolvedSource);
             }
         }
         return result;
