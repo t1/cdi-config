@@ -10,7 +10,6 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.junit.*;
 import org.junit.runner.RunWith;
 
-import com.github.t1.config.ConfigPoint.UpdatableConfigValue;
 import com.github.t1.testtools.*;
 
 import lombok.ToString;
@@ -23,17 +22,17 @@ public class UpdateConfigSourceIT extends AbstractIT {
             String name = configPoint.name();
             if ("java-config-string".equals(name)) {
                 assertNull(configValue);
-                configValue = new InMemoryConfigValue(name, "initial-value", configPoint);
+                configValue = new InMemoryConfigValue(name, "initial-value");
                 configPoint.configValue(configValue);
             }
         }
     }
 
-    public static class InMemoryConfigValue extends UpdatableConfigValue {
+    public static class InMemoryConfigValue extends ConfigValue {
         private String value;
 
-        public InMemoryConfigValue(String name, String value, ConfigPoint configPoint) {
-            configPoint.super(name);
+        public InMemoryConfigValue(String name, String value) {
+            super(name);
             this.value = value;
         }
 

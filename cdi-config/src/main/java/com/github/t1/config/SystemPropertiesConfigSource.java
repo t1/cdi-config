@@ -5,8 +5,6 @@ import static java.util.concurrent.TimeUnit.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-import com.github.t1.config.ConfigPoint.UpdatableConfigValue;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,11 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 public class SystemPropertiesConfigSource implements ConfigSource {
     private static int nextInstance = 0;
 
-    class SystemPropertiesConfigValue extends UpdatableConfigValue {
+    class SystemPropertiesConfigValue extends ConfigValue {
         private String lastStringValue;
 
-        public SystemPropertiesConfigValue(String name, ConfigPoint configPoint) {
-            configPoint.super(name);
+        public SystemPropertiesConfigValue(String name) {
+            super(name);
             this.lastStringValue = stringValue();
         }
 
@@ -94,12 +92,12 @@ public class SystemPropertiesConfigSource implements ConfigSource {
     }
 
     protected SystemPropertiesConfigValue createConfigValueFor(ConfigPoint configPoint) {
-        return new SystemPropertiesConfigValue(configPoint.name(), configPoint);
+        return new SystemPropertiesConfigValue(configPoint.name());
     }
 
     @Override
     public void configure(ConfigPoint configPoint) {
-        SystemPropertiesConfigValue configValue = new SystemPropertiesConfigValue(configPoint.name(), configPoint);
+        SystemPropertiesConfigValue configValue = new SystemPropertiesConfigValue(configPoint.name());
         if (configValue.getValue(configPoint.type()) == null)
             return;
         mapValues.add(configValue);

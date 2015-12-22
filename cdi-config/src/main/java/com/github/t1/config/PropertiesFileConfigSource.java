@@ -5,15 +5,13 @@ import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
 
-import com.github.t1.config.ConfigPoint.UpdatableConfigValue;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PropertiesFileConfigSource implements ConfigSource {
-    private class PropertyConfigValue extends UpdatableConfigValue {
-        public PropertyConfigValue(String name, ConfigPoint configPoint) {
-            configPoint.super(name);
+    private class PropertyConfigValue extends ConfigValue {
+        public PropertyConfigValue(String name) {
+            super(name);
         }
 
         @Override
@@ -195,7 +193,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
         Property property = properties.get(name);
         if (property == null)
             return;
-        PropertyConfigValue configValue = new PropertyConfigValue(name, configPoint);
+        PropertyConfigValue configValue = new PropertyConfigValue(name);
         property.add(configValue);
         configPoint.configValue(configValue);
     }

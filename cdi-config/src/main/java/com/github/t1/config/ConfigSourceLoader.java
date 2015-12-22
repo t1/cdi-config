@@ -1,6 +1,6 @@
 package com.github.t1.config;
 
-import static com.github.t1.config.ConfigPoint.*;
+import static com.github.t1.config.ConfigValue.*;
 
 import java.net.*;
 import java.util.ArrayList;

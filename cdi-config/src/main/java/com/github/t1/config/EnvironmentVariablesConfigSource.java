@@ -1,11 +1,9 @@
 package com.github.t1.config;
 
-import com.github.t1.config.ConfigPoint.ConfigValue;
-
 public class EnvironmentVariablesConfigSource implements ConfigSource {
     class EnvironmentVariableConfigValue extends ConfigValue {
-        public EnvironmentVariableConfigValue(String name, ConfigPoint configPoint) {
-            configPoint.super(name);
+        public EnvironmentVariableConfigValue(String name) {
+            super(name);
         }
 
         @Override
@@ -26,7 +24,7 @@ public class EnvironmentVariablesConfigSource implements ConfigSource {
 
     @Override
     public void configure(ConfigPoint configPoint) {
-        ConfigValue configValue = new EnvironmentVariableConfigValue(configPoint.name(), configPoint);
+        ConfigValue configValue = new EnvironmentVariableConfigValue(configPoint.name());
         if (configValue.getValue(configPoint.type()) == null)
             return;
         configPoint.configValue(configValue);
