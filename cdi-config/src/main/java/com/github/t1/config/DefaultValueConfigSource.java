@@ -24,7 +24,7 @@ public class DefaultValueConfigSource implements ConfigSource {
     public void configure(ConfigPoint configPoint) {
         configPoint.defaultValue().ifPresent(defaultValue -> {
             StaticConfigValue value = new StaticConfigValue(configPoint.name(), defaultValue);
-            configPoint.configValue(value);
+            configPoint.configureTo(value);
         });
     }
 }

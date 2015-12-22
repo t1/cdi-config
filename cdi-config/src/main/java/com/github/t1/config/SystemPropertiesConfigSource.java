@@ -45,16 +45,14 @@ public class SystemPropertiesConfigSource implements ConfigSource {
         }
 
         @Override
-        public synchronized void writeValue(String value) {
-            // FIXME this.lastStringValue = value;
+        public void writeValue(String value) {
             System.setProperty(getName(), value);
-            // FIXME super.updateAllConfigTargets();
         }
     }
 
     private final int instance = nextInstance++;
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private List<SystemPropertiesConfigValue> mapValues = new ArrayList<>();
+    private List<SystemPropertiesConfigValue> systemPropertiesConfigValues = new ArrayList<>();
 
     public SystemPropertiesConfigSource() {
         log.debug("start executor service {}", instance);
@@ -75,9 +73,9 @@ public class SystemPropertiesConfigSource implements ConfigSource {
             }
 
             private void checkSystemPropertyChanges() {
-                for (SystemPropertiesConfigValue watcher : mapValues)
-                    if (watcher.hasChanged())
-                        watcher.updateAllConfigTargets();
+                for (SystemPropertiesConfigValue systemPropertiesConfigValue : systemPropertiesConfigValues)
+                    if (systemPropertiesConfigValue.hasChanged())
+                        systemPropertiesConfigValue.fireUpdate();
             }
         }, 0, 1, SECONDS);
     }
@@ -98,9 +96,7 @@ public class SystemPropertiesConfigSource implements ConfigSource {
     @Override
     public void configure(ConfigPoint configPoint) {
         SystemPropertiesConfigValue configValue = new SystemPropertiesConfigValue(configPoint.name());
-        if (configValue.getValue(configPoint.type()) == null)
-            return;
-        mapValues.add(configValue);
-        configPoint.configValue(configValue);
+        systemPropertiesConfigValues.add(configValue);
+        configPoint.configureTo(configValue);
     }
 }

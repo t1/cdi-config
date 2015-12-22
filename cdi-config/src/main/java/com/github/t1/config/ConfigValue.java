@@ -44,7 +44,7 @@ public abstract class ConfigValue {
         this.observers.add(observer);
     }
 
-    protected void updateAllConfigTargets() {
+    protected void fireUpdate() {
         for (Runnable observer : observers)
             observer.run();
     }

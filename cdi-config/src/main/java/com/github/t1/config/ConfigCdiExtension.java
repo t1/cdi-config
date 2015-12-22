@@ -104,7 +104,7 @@ public class ConfigCdiExtension implements Extension {
                 ConfigPoint configPoint = ConfigPoint.on(field);
                 if (configPoint != null) {
                     log.debug("found config point {}", configPoint);
-                    check(configPoint);
+                    checkAndRemember(configPoint);
                     configSource().configure(configPoint);
                     if (!configPoint.isConfigured()) {
                         String message = "no config value found for " + configPoint + " and no default value specified";
@@ -132,7 +132,7 @@ public class ConfigCdiExtension implements Extension {
      * Checks that all {@link Config#defaultValue}s are the same. This has to be done before the first configSource is
      * consulted, so even if a value is configured, a mismatch in the default value is reported.
      */
-    public void check(ConfigPoint newConfigPoint) {
+    public void checkAndRemember(ConfigPoint newConfigPoint) {
         String name = newConfigPoint.name();
         ConfigPoint existingConfigPoint = configPoints.get(name);
         if (existingConfigPoint == null) {

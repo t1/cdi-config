@@ -24,9 +24,6 @@ public class EnvironmentVariablesConfigSource implements ConfigSource {
 
     @Override
     public void configure(ConfigPoint configPoint) {
-        ConfigValue configValue = new EnvironmentVariableConfigValue(configPoint.name());
-        if (configValue.getValue(configPoint.type()) == null)
-            return;
-        configPoint.configValue(configValue);
+        configPoint.configureTo(new EnvironmentVariableConfigValue(configPoint.name()));
     }
 }

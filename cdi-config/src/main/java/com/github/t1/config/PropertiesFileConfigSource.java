@@ -10,57 +10,38 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PropertiesFileConfigSource implements ConfigSource {
     private class PropertyConfigValue extends ConfigValue {
-        public PropertyConfigValue(String name) {
+        private String value;
+
+        public PropertyConfigValue(String name, String value) {
             super(name);
+            this.value = value;
         }
 
         @Override
         protected <T> T getValue(Class<T> type) {
-            Property property = properties.get(getName());
-            String value = (property == null) ? null : property.value;
             return convert(value, type);
         }
 
         @Override
         public String toString() {
-            return "property " + getName() + " from " + uri;
+            return "property '" + getName() + "' from " + uri;
         }
 
         @Override
         public boolean isWritable() {
-            return PropertiesFileConfigSource.this.isWritable();
+            return isFileScheme(uri) && Files.isWritable(path());
         }
 
         @Override
         public void writeValue(String value) {
-            PropertiesFileConfigSource.this.write(getName(), value);
-        }
-    }
-
-    private static class Property {
-        private String value;
-        private final List<PropertyConfigValue> configs = new ArrayList<>();
-
-        public Property(String value) {
             this.value = value;
-        }
-
-        public void add(PropertyConfigValue configValue) {
-            configs.add(configValue);
-        }
-
-        public boolean updateValue(String newValue) {
-            if (value.equals(newValue))
-                return false;
-            value = newValue;
-            for (PropertyConfigValue config : configs)
-                config.updateAllConfigTargets();
-            return true;
+            save();
+            fireUpdate();
         }
     }
 
     private final URI uri;
-    private final Map<String, Property> properties;
+    private final Map<String, PropertyConfigValue> properties;
 
     private static FileMonitor FILE_MONITOR = new FileMonitor();
 
@@ -94,21 +75,12 @@ public class PropertiesFileConfigSource implements ConfigSource {
         return uri;
     }
 
-    public boolean isWritable() {
-        return isFileScheme(uri) && Files.isWritable(path());
-    }
-
     private boolean isFileScheme(URI uri) {
         return "file".equals(uri.getScheme());
     }
 
     private Path path() {
         return Paths.get(uri);
-    }
-
-    public void write(String name, String value) {
-        properties.get(name).updateValue(value);
-        save();
     }
 
     private void save() {
@@ -120,7 +92,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
         }
     }
 
-    private Properties toProperties(Map<String, Property> map) {
+    private Properties toProperties(Map<String, PropertyConfigValue> map) {
         Properties result = new Properties();
         map.forEach((key, value) -> result.put(key, value.value));
         return result;
@@ -130,11 +102,10 @@ public class PropertiesFileConfigSource implements ConfigSource {
         return path.subpath(beginIndex, path.getNameCount());
     }
 
-    private Map<String, Property> toPropertyMap(Properties in) {
-        Map<String, Property> out = new LinkedHashMap<>();
-        for (String name : in.stringPropertyNames()) {
-            out.put(name, new Property(in.getProperty(name)));
-        }
+    private Map<String, PropertyConfigValue> toPropertyMap(Properties in) {
+        Map<String, PropertyConfigValue> out = new LinkedHashMap<>();
+        in.stringPropertyNames().forEach(
+                name -> out.put(name, new PropertyConfigValue(name, in.getProperty(name))));
         return out;
     }
 
@@ -175,11 +146,12 @@ public class PropertiesFileConfigSource implements ConfigSource {
         ArrayList<String> keys = new ArrayList<>(newProperties.stringPropertyNames());
         for (String key : keys) {
             String newValue = (String) newProperties.remove(key);
-            Property property = properties.get(key);
+            PropertyConfigValue property = properties.get(key);
             if (property == null) {
                 log.error("property '{}' was added to {}... ignoring", key, uri);
             } else {
-                property.updateValue(newValue);
+                property.value = newValue;
+                property.fireUpdate();
             }
         }
         for (String missingKey : newProperties.stringPropertyNames()) {
@@ -190,12 +162,10 @@ public class PropertiesFileConfigSource implements ConfigSource {
     @Override
     public void configure(ConfigPoint configPoint) {
         String name = configPoint.name();
-        Property property = properties.get(name);
-        if (property == null)
+        PropertyConfigValue configValue = properties.get(name);
+        if (configValue == null)
             return;
-        PropertyConfigValue configValue = new PropertyConfigValue(name);
-        property.add(configValue);
-        configPoint.configValue(configValue);
+        configPoint.configureTo(configValue);
     }
 
     @Override
@@ -208,7 +178,7 @@ public class PropertiesFileConfigSource implements ConfigSource {
     }
 
     String removeProperty(String key) {
-        Property removed = properties.remove(key);
+        PropertyConfigValue removed = properties.remove(key);
         return (removed == null) ? null : removed.value;
     }
 

@@ -66,16 +66,18 @@ public abstract class ConfigPoint {
 
     public abstract Class<?> type();
 
-    public void configValue(ConfigValue configValue) {
+    public void configureTo(ConfigValue configValue) {
         if (this.configValue != null)
             throw new IllegalStateException("configValue already set");
+        if (configValue.getValue(type()) == null)
+            return;
         this.configValue = configValue;
         log.debug("configure {}", this);
         configValue.addObserver(this::update);
     }
 
     private void update() {
-        Object value = configValue.getValue(type());
+        Object value = getValue();
         for (Object instance : instances)
             set(instance, value);
     }
@@ -117,7 +119,7 @@ public abstract class ConfigPoint {
 
     public void addConfigTarget(Object target) {
         instances.add(target);
-        set(target, configValue.getValue(type()));
+        set(target, getValue());
     }
 
     public void removeConfigTarget(Object target) {

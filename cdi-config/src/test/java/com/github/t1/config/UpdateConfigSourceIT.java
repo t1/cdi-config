@@ -21,9 +21,9 @@ public class UpdateConfigSourceIT extends AbstractIT {
         public void configure(ConfigPoint configPoint) {
             String name = configPoint.name();
             if ("java-config-string".equals(name)) {
-                assertNull(configValue);
-                configValue = new InMemoryConfigValue(name, "initial-value");
-                configPoint.configValue(configValue);
+                assertNull(javaConfigValue);
+                javaConfigValue = new InMemoryConfigValue(name, "initial-value");
+                configPoint.configureTo(javaConfigValue);
             }
         }
     }
@@ -44,7 +44,7 @@ public class UpdateConfigSourceIT extends AbstractIT {
         @Override
         public void writeValue(String value) {
             this.value = value;
-            updateAllConfigTargets();
+            fireUpdate();
         }
 
         @Override
@@ -59,7 +59,7 @@ public class UpdateConfigSourceIT extends AbstractIT {
     }
 
 
-    private static InMemoryConfigValue configValue;
+    private static InMemoryConfigValue javaConfigValue;
 
     @ToString
     static class ToBeConfigured {
@@ -85,10 +85,10 @@ public class UpdateConfigSourceIT extends AbstractIT {
     public void shouldUpdateFromJavaClass() {
         assertEquals("initial-value", tbc.javaConfigString.get());
 
-        configValue.writeValue("updated-value");
+        javaConfigValue.writeValue("updated-value");
 
         assertEquals("updated-value", tbc.javaConfigString.get());
-        configValue.writeValue("initial-value");
+        javaConfigValue.writeValue("initial-value");
     }
 
     @Test
